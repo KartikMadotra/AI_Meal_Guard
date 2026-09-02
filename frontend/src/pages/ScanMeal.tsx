@@ -340,6 +340,22 @@ export default function ScanMeal() {
                   <div className="plate-label" style={{ top: '68%', left: '38%' }}>Dal <span className="g">~{dalQty} g</span></div>
                 </div>
               </div>
+
+              {/* Render any other detected foods (like UNKNOWN FOOD) */}
+              {Object.entries(result.quantities)
+                .filter(([food]) => !['rice', 'dal', 'vegetable'].includes(food))
+                .length > 0 && (
+                <div className="mb-4 p-3 bg-[var(--color-fail-soft)] text-[var(--color-fail)] text-sm rounded border border-[var(--color-fail)]">
+                  <strong>Other items detected:</strong>
+                  <ul className="mt-1 ml-4 list-disc">
+                    {Object.entries(result.quantities)
+                      .filter(([food]) => !['rice', 'dal', 'vegetable'].includes(food))
+                      .map(([food, qty]) => (
+                        <li key={food}>{food}: ~{qty} g</li>
+                      ))}
+                  </ul>
+                </div>
+              )}
               
               <h2 className="section-h mt-4">What if — adjust dal quantity</h2>
               <div className="flex items-center gap-3.5 flex-wrap">
