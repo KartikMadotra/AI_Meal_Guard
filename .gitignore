@@ -1,0 +1,51 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+venv/
+.venv/
+env/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Environment ──
+.env
+
+# ── Database ──
+*.db
+!data/*.db
+
+# ── AI Models ──
+backend/models/*.pt
+backend/models/*.onnx
+runs/
+
+# ── Dataset ──
+dataset/images/
+dataset/labels/
+dataset/segmentation/
+
+# ── Node / Frontend ──
+node_modules/
+frontend/dist/
+
+# ── Docker ──
+*.log
+
+# ── Uploads ──
+uploads/

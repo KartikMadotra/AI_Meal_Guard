@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "source": "Derived from ICMR-NIN Recommended Dietary Allowances (RDA) for Indians, 2020. Per-meal values assume lunch provides ~35% of daily requirement.",
+    "note": "These are project-configured benchmarks, not official government meal scores.",
+    "version": "1.0",
+    "last_updated": "2026-09-02"
+  },
+  "age_groups": {
+    "6-8": {
+      "label": "6 – 8 years",
+      "age_range": [6, 8],
+      "daily": {
+        "energy_kcal": 1350,
+        "protein_g": 22.2,
+        "carbohydrate_g": 185,
+        "fat_g": 30,
+        "fibre_g": 20,
+        "iron_mg": 16,
+        "calcium_mg": 550,
+        "vitamin_c_mg": 40,
+        "zinc_mg": 7.0
+      },
+      "per_meal": {
+        "energy_kcal": 473,
+        "protein_g": 7.8,
+        "carbohydrate_g": 65,
+        "fat_g": 10.5,
+        "fibre_g": 7.0,
+        "iron_mg": 5.6,
+        "calcium_mg": 193,
+        "vitamin_c_mg": 14,
+        "zinc_mg": 2.5
+      }
+    },
+    "9-10": {
+      "label": "9 – 10 years",
+      "age_range": [9, 10],
+      "daily": {
+        "energy_kcal": 1700,
+        "protein_g": 29.5,
+        "carbohydrate_g": 230,
+        "fat_g": 35,
+        "fibre_g": 25,
+        "iron_mg": 21,
+        "calcium_mg": 700,
+        "vitamin_c_mg": 40,
+        "zinc_mg": 8.0
+      },
+      "per_meal": {
+        "energy_kcal": 595,
+        "protein_g": 10.3,
+        "carbohydrate_g": 81,
+        "fat_g": 12.3,
+        "fibre_g": 8.8,
+        "iron_mg": 7.4,
+        "calcium_mg": 245,
+        "vitamin_c_mg": 14,
+        "zinc_mg": 2.8
+      }
+    },
+    "11-14": {
+      "label": "11 – 14 years",
+      "age_range": [11, 14],
+      "daily": {
+        "energy_kcal": 2200,
+        "protein_g": 40.0,
+        "carbohydrate_g": 300,
+        "fat_g": 40,
+        "fibre_g": 30,
+        "iron_mg": 28,
+        "calcium_mg": 800,
+        "vitamin_c_mg": 50,
+        "zinc_mg": 9.0
+      },
+      "per_meal": {
+        "energy_kcal": 770,
+        "protein_g": 14.0,
+        "carbohydrate_g": 105,
+        "fat_g": 14.0,
+        "fibre_g": 10.5,
+        "iron_mg": 9.8,
+        "calcium_mg": 280,
+        "vitamin_c_mg": 18,
+        "zinc_mg": 3.2
+      }
+    },
+    "15-17": {
+      "label": "15 – 17 years",
+      "age_range": [15, 17],
+      "daily": {
+        "energy_kcal": 2750,
+        "protein_g": 52.0,
+        "carbohydrate_g": 375,
+        "fat_g": 45,
+        "fibre_g": 35,
+        "iron_mg": 32,
+        "calcium_mg": 850,
+        "vitamin_c_mg": 65,
+        "zinc_mg": 12.0
+      },
+      "per_meal": {
+        "energy_kcal": 963,
+        "protein_g": 18.2,
+        "carbohydrate_g": 131,
+        "fat_g": 15.8,
+        "fibre_g": 12.3,
+        "iron_mg": 11.2,
+        "calcium_mg": 298,
+        "vitamin_c_mg": 23,
+        "zinc_mg": 4.2
+      }
+    }
+  }
+}

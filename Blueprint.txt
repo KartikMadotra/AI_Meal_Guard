@@ -1,0 +1,1115 @@
+🚀 Project Name
+AI MealGuard
+“AI-Powered Smart Monitoring for Nutritious School Meals”
+
+SDG: 2 — Zero Hunger
+
+A more competition-style title for the report:
+
+AI MealGuard: An AI-Based Age-Aware System for Visual School Meal Assessment, Nutritional Monitoring and Meal Quality Improvement
+
+I like AI MealGuard because it sounds like an actual system/product rather than just a school project.
+
+🧠 1. THE CORE IDEA
+
+The system answers one main question:
+
+“Is this meal nutritionally appropriate for this student, and if not, what needs to be improved?”
+
+Instead of manually checking every plate, MealGuard uses AI to:
+
+Identify student → understand age → scan meal → identify food → estimate quantity → calculate nutrition → compare with requirements → score meal → explain result → suggest improvement.
+
+🏗️ 2. COMPLETE SYSTEM BLUEPRINT
+                         ┌──────────────────────┐
+                         │      AI MEALGUARD    │
+                         │       SDG 2           │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                       ┌────────────────────────┐
+                       │   STUDENT IDENTIFICATION│
+                       └────────────┬───────────┘
+                                    │
+                 ┌──────────────────┼──────────────────┐
+                 │                  │                  │
+                 ▼                  ▼                  ▼
+          ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+          │ STUDENT ID  │    │  AGE ONLY   │    │ FACE ID*    │
+          │ QR / Input  │    │ Manual Input│    │ Experimental│
+          └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
+                 │                  │                  │
+                 └──────────────────┼──────────────────┘
+                                    ▼
+                         ┌────────────────────┐
+                         │ STUDENT PROFILE    │
+                         │ Age / Class / Group│
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │     MEAL CAMERA    │
+                         │      CAMERA 2      │
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │ FOOD DETECTION     │
+                         │ YOLO / Segmentation│
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │ QUANTITY ESTIMATION│
+                         │ Approx. grams/ml   │
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                    ┌────────────────────────────┐
+                    │     NUTRITION DATABASE     │
+                    │ kcal / protein / iron etc. │
+                    └──────────────┬─────────────┘
+                                   │
+                                   ▼
+                    ┌────────────────────────────┐
+                    │ AGE REQUIREMENTS DATABASE  │
+                    │ Requirements / benchmarks  │
+                    └──────────────┬─────────────┘
+                                   │
+                                   ▼
+                    ┌────────────────────────────┐
+                    │       SCORING ENGINE        │
+                    └──────────────┬─────────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    ▼              ▼              ▼
+                 PASS           REVIEW          FAIL
+                    │              │              │
+                    └──────────────┼──────────────┘
+                                   ▼
+                         ┌────────────────────┐
+                         │ EXPLANATION        │
+                         │ WHY?               │
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │ RECOMMENDATIONS    │
+                         │ How to improve meal│
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │ REPORT / HISTORY   │
+                         └────────────────────┘
+
+* Optional and disabled by default.
+👤 3. STUDENT IDENTIFICATION SYSTEM
+
+You wanted both options, so we'll officially design three modes.
+
+Mode A — Student ID ⭐ Recommended
+
+Student enters/scans:
+
+STU-1024
+
+System checks:
+
+students.db
+       ↓
+Student ID
+       ↓
+Name
+Class
+Age
+Age Group
+
+Example:
+
+STUDENT
+
+ID: STU-1024
+Name: Demo Student
+Class: 7
+Age: 12
+Age Group: 11–14
+
+For the competition, we can use fake/demo students, not real children's data.
+
+Mode B — Age Only
+
+For a completely anonymous demonstration:
+
+ENTER AGE
+
+Age: [ 12 ]
+
+[ CONTINUE ]
+
+System determines:
+
+Age = 12
+Age Group = 11–14
+
+No student database required.
+
+Mode C — Face Recognition
+
+Camera 1:
+
+Student
+   ↓
+Camera 1
+   ↓
+Face detection
+   ↓
+Student identification
+   ↓
+Student database
+   ↓
+Age
+
+But this will be:
+
+OFF by default.
+
+We'll include the architecture/code module, but keep it disabled for the competition prototype unless you deliberately decide to enable it with appropriate consent/privacy safeguards.
+
+📷 4. TWO-CAMERA SETUP
+
+This is one of the things that can make your physical demonstration impressive.
+
+Camera 1 — Student
+
+Mounted facing the student.
+
+       CAMERA 1
+          ↓
+       👤 Student
+
+Depending on the selected mode, it can:
+
+identify student through a QR/ID workflow,
+eventually support face identification,
+or simply remain unused in Age Only mode.
+Camera 2 — Meal
+
+Mounted above the plate.
+
+          CAMERA 2
+             ↓
+        ┌─────────┐
+        │  PLATE  │
+        │ 🍚 🥣 🥬│
+        └─────────┘
+
+This camera performs the actual AI analysis.
+
+🍛 5. FOOD DETECTION
+
+The AI identifies individual food components.
+
+For example:
+
+INPUT IMAGE
+
+        ┌───────────────────┐
+        │       RICE        │
+        │   ███████████     │
+        │                   │
+        │ DAL    VEGETABLE  │
+        │ ████   ███████    │
+        └───────────────────┘
+
+AI output:
+
+Rice       detected
+Dal        detected
+Vegetable  detected
+
+We can use an object-detection/segmentation model such as YOLO.
+
+Important:
+
+Don't start by training 100 food classes.
+
+Start with the foods actually relevant to your target school-meal program.
+
+For example:
+
+rice
+dal
+roti
+vegetable
+potato
+fruit
+milk
+egg
+salad
+
+The final list should be based on the actual meals you're targeting.
+
+⚖️ 6. QUANTITY ESTIMATION
+
+This is a major part of your project.
+
+The AI doesn't just say:
+
+“Dal detected.”
+
+It tries to estimate:
+
+“Approximately 80 g of dal.”
+
+The system uses:
+
+standardized plate,
+fixed camera position,
+known plate dimensions,
+segmentation,
+food area/volume estimation,
+calibration information.
+
+Output:
+
+Rice       ~150 g
+Dal        ~80 g
+Vegetable  ~55 g
+VERY IMPORTANT
+
+We should call these estimates, not exact measurements.
+
+The system should say:
+
+Estimated quantity: ~80 g
+
+rather than:
+
+Quantity: 80.000 g
+
+That makes your project scientifically much more defensible.
+
+🧪 7. CALIBRATION
+
+For your actual project development, use a kitchen weighing scale.
+
+Example:
+
+Food	Actual Weight	AI Estimate	Error
+Rice	150 g	146 g	4 g
+Dal	80 g	84 g	4 g
+Vegetable	60 g	57 g	3 g
+
+You will collect many samples.
+
+Then calculate:
+
+mean error,
+percentage error,
+error by food,
+performance under different lighting/angles.
+
+Do not invent accuracy numbers for the presentation.
+
+Use your real experimental results.
+
+🥗 8. NUTRITION ENGINE
+
+After quantity estimation:
+
+Food
+  ↓
+Quantity
+  ↓
+Nutrition Database
+  ↓
+Nutrient calculation
+
+Your database might contain:
+
+{
+  "food": "dal",
+  "per_100g": {
+    "energy_kcal": "...",
+    "protein_g": "...",
+    "carbohydrate_g": "...",
+    "fat_g": "...",
+    "iron_mg": "...",
+    "calcium_mg": "...",
+    "fibre_g": "..."
+  }
+}
+
+The values should come from reliable nutrition references.
+
+👶 9. AGE REQUIREMENTS DATABASE
+
+This is what makes your project age-aware.
+
+Separate database:
+
+age_requirements.json
+
+Conceptually:
+
+Age Group
+      ↓
+Nutritional benchmark
+      ↓
+Protein
+Energy
+Iron
+Calcium
+etc.
+
+Example structure:
+
+{
+  "age_group": "11-14",
+  "protein_target_g": "...",
+  "energy_target_kcal": "...",
+  "iron_target_mg": "...",
+  "calcium_target_mg": "...",
+  "source": "..."
+}
+
+The actual values will be filled using the appropriate official/reliable standards for your chosen school-meal program.
+
+📊 10. MEAL RULES DATABASE
+
+Another separate file:
+
+meal_rules.json
+
+This controls things like:
+
+Meal type
+Required components
+Portion benchmarks
+Scoring weights
+Critical components
+Allowed alternatives
+
+This is important because AI shouldn't decide the nutritional rules itself.
+
+AI answers:
+
+“What is on the plate?”
+
+The databases answer:
+
+“What does it contain?”
+
+The requirements database answers:
+
+“What is appropriate for this age?”
+
+The scoring engine answers:
+
+“How well does it meet the selected criteria?”
+
+🧮 11. SCORING ENGINE
+
+The score could combine several components.
+
+For example:
+
+              MEAL SCORE
+                  │
+       ┌──────────┼───────────┐
+       ↓          ↓           ↓
+   Nutrition   Portion    Required
+   adequacy    adequacy   components
+       │          │           │
+       └──────────┼───────────┘
+                  ↓
+             SCORE / 100
+
+A possible initial framework:
+
+Protein adequacy       30%
+Energy adequacy        25%
+Meal components        20%
+Micronutrients         15%
+Portion adequacy       10%
+
+These weights are project-design choices, not official government scoring unless we find a source that explicitly defines them.
+
+We can refine this once we lock the exact standard.
+
+🟢🟡🔴 12. PASS / REVIEW / FAIL
+
+I strongly recommend three levels, not just pass/fail.
+
+🟢 PASS
+
+Meal comfortably meets the selected criteria.
+
+🟡 REVIEW
+
+Meal is close to the threshold or the AI estimate has significant uncertainty.
+
+🔴 FAIL
+
+Meal clearly fails one or more critical criteria.
+
+This is much more realistic because camera-based quantity estimation is approximate.
+
+🔍 13. THE "WHY?" FEATURE
+
+This could be one of your strongest features.
+
+Instead of simply:
+
+SCORE: 64
+FAIL
+
+show:
+
+WHY?
+
+Age group: 11–14
+
+Estimated protein: 12.4 g
+Selected benchmark: 18.0 g
+
+Coverage: 69%
+
+Main protein source:
+Dal — ~55 g
+
+Problem:
+Protein component is below the
+selected benchmark.
+
+Recommendation:
+Increase the pulse/protein component.
+
+The judge can actually understand how the AI reached the decision.
+
+💡 14. RECOMMENDATION ENGINE
+
+The system shouldn't only detect a problem.
+
+It should suggest a solution.
+
+Example:
+
+PROBLEM
+
+Protein is below the selected benchmark.
+
+AI SUGGESTION
+
+Increase the pulse/protein component.
+
+Possible improvement:
++ approximately 30 g dal
+
+Estimated result:
+
+Protein: ↑
+Score: ↑
+Status: REVIEW → PASS
+
+Again, the recommendation should be based on your configured nutrition database and rules.
+
+🔮 15. WHAT-IF SIMULATOR
+
+This is an optional wow feature.
+
+After the meal is analyzed:
+
+CURRENT MEAL
+
+Score: 68
+Protein: 12.4 g
+
+        ↓
+
+WHAT IF?
+
+[ +30 g DAL ]
+
+        ↓
+
+RECALCULATE
+
+Protein: XX.X g
+Score: XX
+
+Status:
+REVIEW → PASS
+
+You can let the judge interact with this.
+
+That turns the project from:
+
+“AI detects food.”
+
+into:
+
+“AI analyzes a nutritional problem and models how the meal could be improved.”
+
+📈 16. MEAL HISTORY
+
+Every analysis can be stored.
+
+Meal History
+
+02 Sep
+Student: STU-1024
+Age: 12
+Score: 87
+Status: PASS
+
+03 Sep
+Student: STU-1024
+Age: 12
+Score: 64
+Status: REVIEW
+
+04 Sep
+Student: STU-1024
+Age: 12
+Score: 91
+Status: PASS
+🏫 17. SCHOOL DASHBOARD
+
+You can then show aggregate information.
+
+Example:
+
+SCHOOL MEAL DASHBOARD
+
+Meals analyzed: 1,240
+
+Average Score
+████████░░ 82
+
+PASS       78%
+REVIEW     16%
+FAIL        6%
+
+Common Issues
+
+Protein below benchmark     31%
+Low vegetable portion       24%
+Missing component           12%
+
+For a real deployment, use anonymized aggregate statistics where appropriate.
+
+🖥️ 18. MAIN APPLICATION
+
+I'd make the app have these pages:
+
+┌───────────────────────────────┐
+│        AI MEALGUARD           │
+├───────────────────────────────┤
+│                               │
+│  🏠 Dashboard                 │
+│  📷 Scan Meal                 │
+│  🥗 Nutrition Analysis        │
+│  👤 Students                  │
+│  📚 Age Requirements          │
+│  🍛 Food Database             │
+│  📊 Meal History              │
+│  💡 Recommendations           │
+│  ⚙️ Settings                  │
+│                               │
+└───────────────────────────────┘
+⚙️ 19. SETTINGS
+
+This is where your flexibility comes in.
+
+SYSTEM SETTINGS
+
+IDENTIFICATION
+
+● Student ID
+○ Age Only
+○ Face Recognition
+
+MEAL ANALYSIS
+
+☑ Food Detection
+☑ Quantity Estimation
+☑ Nutrition Analysis
+☑ Age-Based Comparison
+☑ Scoring
+☑ Recommendations
+
+OUTPUT
+
+☑ Student Details
+☑ Meal Details
+☑ Nutrition
+☑ Explanation
+☑ PASS/REVIEW/FAIL
+
+You can change the mode without rewriting the project.
+
+🗄️ 20. DATABASE ARCHITECTURE
+
+I'd keep the information separated.
+
+                    DATABASE LAYER
+                         │
+        ┌────────────────┼────────────────┐
+        ↓                ↓                ↓
+  students.db      nutrition.json   age_requirements.json
+        │                │                │
+        │                │                │
+ Student details     Food data       Age benchmarks
+        │                │                │
+        └────────────────┼────────────────┘
+                         ↓
+                  meal_rules.json
+                         │
+                         ↓
+                   SCORING ENGINE
+
+This separation is very important.
+
+If the government changes a nutritional guideline later, you shouldn't need to retrain the computer-vision model.
+
+🤖 21. AI ARCHITECTURE
+Camera
+   ↓
+Image preprocessing
+   ↓
+YOLO detection
+   ↓
+Segmentation
+   ↓
+Food classification
+   ↓
+Quantity estimation
+   ↓
+Nutrition calculation
+
+The AI model doesn't directly calculate the final score.
+
+That's handled by normal software logic.
+
+This gives you a clean architecture:
+
+AI
+↓
+VISION
+
+DATABASE
+↓
+NUTRITION
+
+RULE ENGINE
+↓
+ASSESSMENT
+
+APPLICATION
+↓
+USER EXPERIENCE
+🐳 22. DOCKER
+
+Since you specifically want Docker, we'll build the project so the environment is reproducible.
+
+AI MealGuard
+│
+├── Frontend Container
+│
+├── Backend Container
+│
+└── AI/Analysis Environment
+
+The goal is:
+
+School Computer
+       ↓
+Docker
+       ↓
+Same Python
+Same libraries
+Same versions
+Same dependencies
+       ↓
+AI MealGuard
+
+So you don't have to fight:
+
+“It works on my laptop but doesn't work on the school PC.”
+
+GPU support
+
+Since your school system has a good GPU, we'll design the AI environment to support GPU acceleration.
+
+But we'll also maintain a CPU fallback/demo mode.
+
+📁 23. FINAL PROJECT STRUCTURE
+AI-MealGuard/
+│
+├── docker-compose.yml
+├── Dockerfile
+├── README.md
+├── .env.example
+├── .gitignore
+│
+├── backend/
+│   ├── main.py
+│   │
+│   ├── api/
+│   │   ├── analysis.py
+│   │   ├── students.py
+│   │   ├── meals.py
+│   │   └── reports.py
+│   │
+│   ├── ai/
+│   │   ├── detector.py
+│   │   ├── segmentation.py
+│   │   ├── portion.py
+│   │   └── preprocessing.py
+│   │
+│   ├── nutrition/
+│   │   ├── calculator.py
+│   │   └── database.py
+│   │
+│   ├── scoring/
+│   │   ├── scoring.py
+│   │   └── rules.py
+│   │
+│   ├── identification/
+│   │   ├── student_id.py
+│   │   └── face_recognition.py
+│   │
+│   └── models/
+│       └── mealguard.pt
+│
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+│
+├── data/
+│   ├── students.db
+│   ├── nutrition.json
+│   ├── age_requirements.json
+│   └── meal_rules.json
+│
+├── dataset/
+│   ├── images/
+│   ├── labels/
+│   └── segmentation/
+│
+├── training/
+│   ├── data.yaml
+│   └── train.py
+│
+├── tests/
+│
+└── docs/
+    ├── architecture.png
+    ├── methodology.md
+    ├── limitations.md
+    └── presentation.md
+🔐 24. FACE RECOGNITION MODULE
+
+It will exist in the architecture but remain disabled.
+
+# ============================================================
+# OPTIONAL FACE IDENTIFICATION
+# DISABLED IN DEFAULT COMPETITION BUILD
+# ============================================================
+
+# Future concept:
+#
+# Camera 1
+#    ↓
+# Face detection
+#    ↓
+# Face embedding
+#    ↓
+# Authorized database lookup
+#    ↓
+# Student ID
+#    ↓
+# Student profile
+#
+# Recommended prototype:
+# QR / Student ID
+#
+# Do not require face recognition for the core system.
+
+def identify_student_by_face(frame):
+    """
+    OPTIONAL / DISABLED.
+    Future face-identification implementation.
+    """
+    return None
+
+So you can later turn it on if you decide it's appropriate.
+
+🧪 25. YOUR COMPETITION DEMONSTRATION
+
+This is how I would actually demonstrate it to judges.
+
+STEP 1
+
+Judge/student approaches.
+
+AI MEALGUARD
+Select Identification
+
+[ STUDENT ID ]
+[ AGE ONLY ]
+
+Choose Student ID.
+
+STEP 2
+
+Enter:
+
+STU-1024
+
+System displays:
+
+Student
+Age: 12
+Class: 7
+Age Group: 11–14
+STEP 3
+
+Put a prepared meal underneath Camera 2.
+
+The screen shows live detection:
+
+Rice       ~150 g
+Dal        ~80 g
+Vegetable  ~55 g
+
+with segmentation/detection overlays.
+
+STEP 4
+
+System calculates:
+
+ENERGY
+PROTEIN
+IRON
+CALCIUM
+FIBRE
+...
+STEP 5
+
+System retrieves the relevant age/meal benchmark.
+
+Age Group: 11–14
+Selected Meal Standard: XXXXX
+STEP 6
+
+Score appears:
+
+          86 / 100
+
+             🟢
+            PASS
+STEP 7
+
+Press:
+
+WHY?
+
+And show the reasoning.
+
+STEP 8 — WOW MOMENT
+
+Press:
+
+WHAT IF?
+
+Add:
+
++30 g DAL
+
+System recalculates.
+
+OLD SCORE: 68
+
+NEW SCORE: 82
+
+REVIEW → PASS
+
+That is a very strong live demonstration.
+
+🧪 26. THREE TEST PLATES
+
+Prepare these beforehand.
+
+Plate A — Good
+Rice
+Dal
+Vegetable
+
+Expected:
+
+🟢 PASS
+
+Plate B — Low protein
+Rice
+Very little Dal
+Vegetable
+
+Expected:
+
+🟡 REVIEW / lower score
+
+Plate C — Missing component
+Rice
+Dal
+No vegetable
+
+Expected:
+
+🔴 REVIEW/FAIL depending on your configured rules.
+
+Then show the judge that the AI can explain why.
+
+📏 27. SCIENTIFIC VALIDATION
+
+This is what separates your project from a flashy AI demo.
+
+You should actually test:
+
+Food detection
+Precision
+Recall
+mAP
+Quantity estimation
+Actual weight
+vs
+AI estimated weight
+Nutrition calculation
+
+Check whether the nutrition calculation correctly follows:
+
+food quantity × nutrient density
+Overall assessment
+
+Test multiple controlled meals and compare AI output with your reference calculation.
+
+⚠️ 28. WHAT THE SYSTEM SHOULD NOT CLAIM
+
+Don't say:
+
+“AI proves the food is safe.”
+
+A camera cannot establish microbiological safety.
+
+Don't say:
+
+“AI measures exactly 82 g.”
+
+Say:
+
+“AI estimates approximately 82 g.”
+
+Don't say:
+
+“This is an official government score.”
+
+Unless your scoring system is actually based on an official published scoring standard.
+
+Instead:
+
+“MealGuard Score based on configured nutritional and meal criteria.”
+
+This makes your project much more credible.
+
+🌍 29. SDG 2 CONNECTION
+
+Your project directly supports the idea of:
+
+SDG 2 — Zero Hunger
+
+But your angle isn't simply:
+
+“Give people food.”
+
+It's:
+
+“Help ensure that food provided to school students is nutritionally adequate and that deficiencies can be identified and addressed.”
+
+Potential impact:
+
+AI
+ ↓
+Better meal monitoring
+ ↓
+Identify nutritional gaps
+ ↓
+Actionable recommendations
+ ↓
+Better school meal quality
+ ↓
+Improved nutrition
+ ↓
+SDG 2
+🚀 30. FUTURE VERSION
+
+Once the prototype works, the system could eventually expand to:
+
+ONE SCHOOL
+     ↓
+MULTIPLE SCHOOLS
+     ↓
+SCHOOL DASHBOARD
+     ↓
+ANONYMIZED AGGREGATE DATA
+     ↓
+DISTRICT / PROGRAM MONITORING
+
+Potential future features:
+
+automated meal reports,
+nutrition trend analysis,
+meal planning,
+shortage detection,
+school-level dashboards,
+anonymized statistics,
+meal recommendation engine,
+multilingual interface,
+offline operation,
+QR-based student identification,
+optional biometric identification.
+🏆 FINAL PROJECT PITCH
+
+If a judge asks:
+
+“What exactly is your project?”
+
+Your answer can be:
+
+“AI MealGuard is an AI-powered, age-aware school meal monitoring system designed around SDG 2. It identifies the student or accepts their age, uses computer vision to detect the foods on a meal plate and estimate their quantities, calculates the estimated nutritional content, compares it with the selected age-specific meal requirements, and generates an explainable score with PASS, REVIEW or FAIL status and recommendations for improving the meal.”
+
+That is the core identity of the project.
+
+🔥 And the project has 5 strong layers
+             AI MEALGUARD
+                  │
+       ┌──────────┼──────────┐
+       ↓          ↓          ↓
+   IDENTIFY     SEE        UNDERSTAND
+   Student      Food       Nutrition
+       │          │          │
+       └──────────┼──────────┘
+                  ↓
+              COMPARE
+                  ↓
+            AGE REQUIREMENTS
+                  ↓
+              EVALUATE
+                  ↓
+          SCORE + EXPLAIN
+                  ↓
+             IMPROVE
+
+Identify → Detect → Estimate → Calculate → Compare → Score → Explain → Improve

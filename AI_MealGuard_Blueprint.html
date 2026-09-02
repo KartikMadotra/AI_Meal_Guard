@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI MealGuard — Project Blueprint</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --text:#172033; --muted:#667085;
+    --line:#d9e0ea; --accent:#2563eb; --accent2:#0f766e;
+    --green:#16a34a; --yellow:#d97706; --red:#dc2626;
+    --shadow:0 12px 30px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:linear-gradient(180deg,#eef4ff 0,#f8fafc 35%,#f6f8fb 100%);
+    color:var(--text); line-height:1.55;
+  }
+  .wrap{max-width:1200px;margin:auto;padding:32px 22px 70px}
+  .hero{
+    background:var(--card); border:1px solid var(--line); border-radius:24px;
+    padding:38px; box-shadow:var(--shadow); text-align:center;
+  }
+  .badge{
+    display:inline-block;padding:7px 13px;border-radius:999px;
+    background:#e8f0ff;color:#1746a2;font-weight:700;font-size:13px;
+  }
+  h1{font-size:clamp(34px,6vw,64px);margin:14px 0 4px;letter-spacing:-2px}
+  .subtitle{font-size:20px;color:var(--muted);margin:0 auto;max-width:850px}
+  .sdg{margin-top:18px;font-weight:800;color:var(--accent2)}
+  section{margin-top:28px}
+  .section-title{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  h2{margin:0;font-size:27px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:22px;box-shadow:0 6px 18px rgba(16,24,40,.045)
+  }
+  .card h3{margin:0 0 8px;font-size:19px}
+  .card p{margin:7px 0;color:var(--muted)}
+  .flow{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;
+    background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;
+  }
+  .node{
+    padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
+    background:#fff;text-align:center;font-weight:750;min-width:135px;
+  }
+  .arrow{font-size:25px;color:var(--accent);font-weight:900}
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .mode{border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff}
+  .mode.recommended{border:2px solid var(--accent)}
+  .tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+  ul{margin:10px 0 0;padding-left:20px}
+  li{margin:6px 0}
+  .pipeline{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  }
+  .step{padding:17px;border-radius:15px;background:#fff;border:1px solid var(--line);text-align:center}
+  .step strong{display:block;margin-bottom:5px}
+  .db{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:#0f172a;color:#e2e8f0;border-radius:16px;padding:20px;overflow:auto;
+    white-space:pre; font-size:13px;
+  }
+  .screen{
+    background:#101828;color:#f8fafc;border-radius:18px;padding:24px;
+    box-shadow:var(--shadow);max-width:720px;margin:auto
+  }
+  .screen .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .score{font-size:42px;font-weight:900}
+  .bar{height:9px;background:#344054;border-radius:99px;overflow:hidden;margin:6px 0 12px}
+  .fill{height:100%;background:#60a5fa}
+  .status{font-size:22px;font-weight:900}
+  .pass{color:#4ade80}.review{color:#fbbf24}.fail{color:#f87171}
+  .table-wrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px}
+  table{border-collapse:collapse;width:100%;min-width:650px}
+  th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--line)}
+  th{background:#f8fafc}
+  .folder{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;line-height:1.7}
+  .callout{
+    border-left:5px solid var(--accent);background:#eff6ff;border-radius:12px;
+    padding:16px 18px
+  }
+  .warning{
+    border-left:5px solid var(--yellow);background:#fffbeb;border-radius:12px;
+    padding:16px 18px
+  }
+  .footer{text-align:center;color:var(--muted);margin-top:35px}
+  @media(max-width:850px){
+    .grid,.grid2,.modes{grid-template-columns:1fr}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .hero{padding:28px 20px}
+  }
+  @media(max-width:520px){
+    .pipeline{grid-template-columns:1fr}
+    .flow{flex-direction:column}
+    .arrow{transform:rotate(90deg)}
+  }
+  @media print{
+    body{background:#fff}.hero,.card,.flow,.screen,.table-wrap{box-shadow:none}
+    .wrap{max-width:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="badge">PROJECT BLUEPRINT • SDG 2</span>
+    <h1>AI MealGuard</h1>
+    <p class="subtitle">AI-Powered Age-Aware School Meal Assessment, Nutritional Monitoring &amp; Meal Improvement System</p>
+    <div class="sdg">🌍 Sustainable Development Goal 2 — Zero Hunger</div>
+  </header>
+
+  <section>
+    <div class="section-title"><h2>1. Core Objective</h2></div>
+    <div class="callout">
+      <strong>Main question:</strong> Is the meal nutritionally appropriate for the selected student profile, and what can be improved?
+      MealGuard combines computer vision, approximate portion estimation, nutrition data, age-specific benchmarks, explainable scoring and recommendations.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Complete System Flow</h2></div>
+    <div class="flow">
+      <div class="node">👤 Student</div><div class="arrow">→</div>
+      <div class="node">Identification</div><div class="arrow">→</div>
+      <div class="node">Student / Age Profile</div><div class="arrow">→</div>
+      <div class="node">📷 Meal Camera</div><div class="arrow">→</div>
+      <div class="node">Food Detection</div><div class="arrow">→</div>
+      <div class="node">Quantity Estimate</div><div class="arrow">→</div>
+      <div class="node">Nutrition Engine</div><div class="arrow">→</div>
+      <div class="node">Age Requirements</div><div class="arrow">→</div>
+      <div class="node">Score</div><div class="arrow">→</div>
+      <div class="node">PASS / REVIEW / FAIL</div><div class="arrow">→</div>
+      <div class="node">Why? + Recommendation</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>3. Student Identification — Three Configurable Modes</h2></div>
+    <div class="modes">
+      <div class="mode recommended">
+        <div class="tag">Recommended prototype</div>
+        <h3>🪪 Student ID / QR</h3>
+        <p>Scan or enter a demo student ID.</p>
+        <ul><li>Student ID</li><li>Name / display name</li><li>Class</li><li>Age</li><li>Age group</li></ul>
+      </div>
+      <div class="mode">
+        <div class="tag">Anonymous mode</div>
+        <h3>🔢 Age Only</h3>
+        <p>Enter age directly when no student database is required.</p>
+        <ul><li>Age input</li><li>Automatic age-group selection</li><li>No identity required</li></ul>
+      </div>
+      <div class="mode">
+        <div class="tag">Experimental • disabled by default</div>
+        <h3>📷 Face ID</h3>
+        <p>Camera 1 can conceptually identify an authorized demo student.</p>
+        <ul><li>Face detection</li><li>Authorized lookup</li><li>Student profile retrieval</li><li>Privacy safeguards required</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Two-Camera Physical Prototype</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Camera 1 — Student / Identification</h3>
+        <p>Placed facing the student. Used for the selected identification mode.</p>
+        <p><strong>Default:</strong> Student ID / QR. Face recognition remains optional.</p>
+      </div>
+      <div class="card">
+        <h3>Camera 2 — Meal Analysis</h3>
+        <p>Mounted above a standardized plate under controlled lighting.</p>
+        <p><strong>Purpose:</strong> Detect foods, segment them and estimate approximate quantities.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>5. AI Meal Analysis Pipeline</h2></div>
+    <div class="pipeline">
+      <div class="step"><strong>01 • Capture</strong>Meal image from Camera 2</div>
+      <div class="step"><strong>02 • Detect</strong>Identify food classes</div>
+      <div class="step"><strong>03 • Segment</strong>Separate food regions</div>
+      <div class="step"><strong>04 • Estimate</strong>Approx. grams / ml</div>
+      <div class="step"><strong>05 • Calculate</strong>Nutrient totals</div>
+      <div class="step"><strong>06 • Compare</strong>Age / meal benchmarks</div>
+      <div class="step"><strong>07 • Score</strong>Generate 0–100 score</div>
+      <div class="step"><strong>08 • Explain</strong>Why + recommendation</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Food &amp; Quantity Detection</h2></div>
+    <div class="grid">
+      <div class="card"><h3>Food Detection</h3><p>Use a computer-vision model such as YOLO for relevant school-meal food classes.</p></div>
+      <div class="card"><h3>Segmentation</h3><p>Prefer segmentation where possible because portion estimation needs the food region, not only a bounding box.</p></div>
+      <div class="card"><h3>Quantity</h3><p>Use a standardized plate, fixed camera geometry and calibration to estimate approximate mass or volume.</p></div>
+    </div>
+    <div class="warning" style="margin-top:16px">
+      <strong>Scientific limitation:</strong> A normal RGB camera does not directly weigh food. Report values as estimates such as <strong>~80 g</strong>, validate against a scale, and publish your measured error.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>7. Data Architecture</h2></div>
+    <div class="db">AI MealGuard Data Layer
+
+students.db
+  └── student_id
+  └── display_name
+  └── class
+  └── age
+  └── age_group
+
+nutrition.json
+  └── food
+  └── kcal / 100g
+  └── protein / 100g
+  └── carbs / 100g
+  └── fat / 100g
+  └── iron / 100g
+  └── calcium / 100g
+  └── fibre / 100g
+
+age_requirements.json
+  └── age_group
+  └── energy benchmark
+  └── protein benchmark
+  └── iron benchmark
+  └── calcium benchmark
+  └── source / version / notes
+
+meal_rules.json
+  └── meal type
+  └── required components
+  └── portion benchmarks
+  └── scoring weights
+  └── critical rules
+  └── allowed alternatives</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>8. Nutrition Calculation</h2></div>
+    <div class="callout">
+      For each detected food, quantity is combined with the nutrition database to estimate nutrient contribution.
+      The system then sums contributions across the entire meal.
+    </div>
+    <div class="grid" style="margin-top:16px">
+      <div class="card"><h3>Energy</h3><p>Estimated kcal from all detected food portions.</p></div>
+      <div class="card"><h3>Protein</h3><p>Primary nutrient metric, especially useful for explaining deficiencies.</p></div>
+      <div class="card"><h3>Micronutrients</h3><p>Potentially iron, calcium and other nutrients supported by the chosen reference data.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>9. Age-Aware Assessment</h2></div>
+    <div class="flow">
+      <div class="node">Age / Student Profile</div><div class="arrow">→</div>
+      <div class="node">Age Group</div><div class="arrow">→</div>
+      <div class="node">Requirements DB</div><div class="arrow">→</div>
+      <div class="node">Meal Nutrition</div><div class="arrow">→</div>
+      <div class="node">Coverage</div><div class="arrow">→</div>
+      <div class="node">Assessment</div>
+    </div>
+    <p style="color:var(--muted);margin-top:14px">
+      The exact requirements must be populated from the selected official/reliable standard for the school-meal program.
+      Do not invent nutritional targets.
+    </p>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>10. Explainable Scoring</h2></div>
+    <div class="grid">
+      <div class="card"><h3>Nutrition Adequacy</h3><p>Compare estimated nutrients against selected benchmarks.</p></div>
+      <div class="card"><h3>Meal Components</h3><p>Check required components and configured portion rules.</p></div>
+      <div class="card"><h3>Uncertainty</h3><p>Use a REVIEW band when estimates are close to thresholds or confidence is low.</p></div>
+    </div>
+    <div class="screen" style="margin-top:18px">
+      <div class="top">
+        <div><strong>AI MEALGUARD</strong><br><small>SDG 2 — ZERO HUNGER</small></div>
+        <div>Age group: 11–14</div>
+      </div>
+      <hr style="border:0;border-top:1px solid #344054;margin:18px 0">
+      <div>Protein <div class="bar"><div class="fill" style="width:82%"></div></div></div>
+      <div>Energy <div class="bar"><div class="fill" style="width:91%"></div></div></div>
+      <div>Portion <div class="bar"><div class="fill" style="width:84%"></div></div></div>
+      <div style="margin-top:16px">Meal Score</div>
+      <div class="score">84 / 100</div>
+      <div class="status pass">● PASS</div>
+      <p style="color:#98a2b3">Example interface only — replace example numbers with calculated project data.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>11. “WHY?” Explanation</h2></div>
+    <div class="card">
+      <h3>Why did the meal receive this score?</h3>
+      <ul>
+        <li>Show selected age group.</li>
+        <li>Show estimated nutrient amount.</li>
+        <li>Show the selected benchmark.</li>
+        <li>Show percentage coverage.</li>
+        <li>Identify the main contributing food.</li>
+        <li>Explain the failed or weak criterion.</li>
+      </ul>
+      <div class="callout" style="margin-top:15px">
+        <strong>Example:</strong> Protein is below the selected benchmark. Dal is the main detected protein source. Consider increasing the pulse/protein component.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>12. What-If Improvement Simulator</h2></div>
+    <div class="flow">
+      <div class="node">Current Meal<br><strong>Score 68</strong></div>
+      <div class="arrow">→</div>
+      <div class="node">Add / Remove Component</div>
+      <div class="arrow">→</div>
+      <div class="node">Recalculate Nutrition</div>
+      <div class="arrow">→</div>
+      <div class="node">New Score</div>
+    </div>
+    <p style="text-align:center;color:var(--muted)">Example: simulate adding an additional pulse/protein portion and show how the assessment changes.</p>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>13. Meal History &amp; Dashboard</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Student / Anonymous</th><th>Age Group</th><th>Score</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>02 Sep</td><td>STU-1024</td><td>11–14</td><td>87</td><td class="pass">PASS</td></tr>
+          <tr><td>03 Sep</td><td>STU-1024</td><td>11–14</td><td>64</td><td class="review">REVIEW</td></tr>
+          <tr><td>04 Sep</td><td>Anonymous</td><td>6–10</td><td>91</td><td class="pass">PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--muted)">The rows above are demonstration placeholders, not real measurements.</p>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>14. Recommended Project Structure</h2></div>
+    <div class="db folder">AI-MealGuard/
+├── docker-compose.yml
+├── Dockerfile
+├── README.md
+├── .env.example
+│
+├── backend/
+│   ├── main.py
+│   ├── api/
+│   │   ├── analysis.py
+│   │   ├── students.py
+│   │   ├── meals.py
+│   │   └── reports.py
+│   ├── ai/
+│   │   ├── detector.py
+│   │   ├── segmentation.py
+│   │   ├── portion.py
+│   │   └── preprocessing.py
+│   ├── nutrition/
+│   │   ├── calculator.py
+│   │   └── database.py
+│   ├── scoring/
+│   │   ├── scoring.py
+│   │   └── rules.py
+│   ├── identification/
+│   │   ├── student_id.py
+│   │   └── face_recognition.py
+│   └── models/
+│       └── mealguard.pt
+│
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+│
+├── data/
+│   ├── students.db
+│   ├── nutrition.json
+│   ├── age_requirements.json
+│   └── meal_rules.json
+│
+├── dataset/
+│   ├── images/
+│   ├── labels/
+│   └── segmentation/
+│
+├── training/
+│   ├── data.yaml
+│   └── train.py
+│
+├── tests/
+└── docs/
+    ├── architecture.png
+    ├── methodology.md
+    └── limitations.md</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>15. Docker Deployment</h2></div>
+    <div class="grid">
+      <div class="card"><h3>Backend</h3><p>FastAPI or equivalent Python API for analysis, databases, scoring and reports.</p></div>
+      <div class="card"><h3>Frontend</h3><p>Web interface served independently so the UI remains easy to update.</p></div>
+      <div class="card"><h3>AI Runtime</h3><p>Containerized Python/ML dependencies with GPU support when available and CPU fallback where needed.</p></div>
+    </div>
+    <div class="callout" style="margin-top:16px">
+      <strong>Goal:</strong> package the application and its dependencies into a reproducible environment so the school computer does not require manually matching Python/library versions.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>16. Validation Plan</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Vision Model</h3>
+        <ul><li>Precision</li><li>Recall</li><li>mAP</li><li>Performance by food class</li></ul>
+      </div>
+      <div class="card">
+        <h3>Quantity Estimation</h3>
+        <ul><li>Actual weight using a scale</li><li>AI estimate</li><li>Absolute / percentage error</li><li>Test different lighting and portions</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>17. Competition Demo</h2></div>
+    <div class="flow">
+      <div class="node">1. Select Student ID / Age</div><div class="arrow">→</div>
+      <div class="node">2. Show Profile</div><div class="arrow">→</div>
+      <div class="node">3. Place Plate</div><div class="arrow">→</div>
+      <div class="node">4. Live AI Detection</div><div class="arrow">→</div>
+      <div class="node">5. Nutrition</div><div class="arrow">→</div>
+      <div class="node">6. Score</div><div class="arrow">→</div>
+      <div class="node">7. WHY?</div><div class="arrow">→</div>
+      <div class="node">8. WHAT-IF?</div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card"><h3>Plate A</h3><p>Balanced demonstration meal → expected higher score.</p></div>
+      <div class="card"><h3>Plate B</h3><p>Reduced protein component → demonstrates REVIEW / lower score.</p></div>
+      <div class="card"><h3>Plate C</h3><p>Missing configured component → demonstrates rule-based warning.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>18. Privacy &amp; Scientific Guardrails</h2></div>
+    <div class="warning">
+      <ul>
+        <li>Use fake/demo student records for the competition.</li>
+        <li>Keep face identification disabled by default.</li>
+        <li>Do not claim that visual analysis proves food safety or contamination status.</li>
+        <li>Use “estimated quantity” and “estimated nutrient content”.</li>
+        <li>Do not present a project-defined score as an official government score unless it is actually sourced.</li>
+        <li>Record model uncertainty and measurement error where possible.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>19. Final Project Architecture</h2></div>
+    <div class="flow">
+      <div class="node">IDENTIFY</div><div class="arrow">→</div>
+      <div class="node">DETECT</div><div class="arrow">→</div>
+      <div class="node">ESTIMATE</div><div class="arrow">→</div>
+      <div class="node">CALCULATE</div><div class="arrow">→</div>
+      <div class="node">COMPARE</div><div class="arrow">→</div>
+      <div class="node">SCORE</div><div class="arrow">→</div>
+      <div class="node">EXPLAIN</div><div class="arrow">→</div>
+      <div class="node">IMPROVE</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <strong>AI MealGuard</strong> • AI-Powered Smart Monitoring for Nutritious School Meals • SDG 2
+  </div>
+</div>
+</body>
+</html>

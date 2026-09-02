@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #E9EBE6;
+  --color-panel: #FFFFFF;
+  --color-ink: #20241F;
+  --color-ink-soft: #5B6158;
+  --color-rice: #EFE8CC;
+  --color-dal: #C9922E;
+  --color-dal-soft: #F2E2C0;
+  --color-veg: #4C7A4A;
+  --color-veg-soft: #DEE9DC;
+  --color-fail: #A03B2A;
+  --color-fail-soft: #F1DAD4;
+  --color-line: #D8DAD2;
+  --color-focus: #2E5D6E;
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+#root { min-height: 100vh; }
+
+a, button { font-family: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ── Panel (white card with hairline border) ─────────── */
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+}
+
+/* ── Section divider ─────────────────────────────────── */
+.section {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--color-line);
+}
+.section:last-child { border-bottom: none; }
+
+.section-title {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+}
+
+/* ── Fraunces headings ───────────────────────────────── */
+.heading-serif {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ── Status pills ────────────────────────────────────── */
+.pill {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.pill-pass { background: var(--color-veg-soft); color: #2E5233; }
+.pill-review { background: var(--color-dal-soft); color: #7A5A17; }
+.pill-fail { background: var(--color-fail-soft); color: #7A2A1C; }
+
+/* ── Meter bar ───────────────────────────────────────── */
+.meter-track {
+  height: 6px;
+  background: var(--color-line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+/* ── Data row ────────────────────────────────────────── */
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14.5px;
+  padding: 6px 0;
+}
+.data-row .label { color: var(--color-ink-soft); }
+.data-row .value { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* ── Swatch ──────────────────────────────────────────── */
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Tabular nums ────────────────────────────────────── */
+.num { font-variant-numeric: tabular-nums; }
+
+/* ── Button ──────────────────────────────────────────── */
+.btn {
+  border: 1px solid var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-panel);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  font-family: var(--font-sans);
+}
+.btn:hover { opacity: 0.85; }
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+.btn-secondary:hover { border-color: var(--color-ink); }
+
+/* ── Input ───────────────────────────────────────────── */
+.input {
+  width: 100%;
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  transition: border-color 0.15s ease;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+
+/* ── Range slider ────────────────────────────────────── */
+input[type="range"] {
+  accent-color: var(--color-dal);
+}
+
+/* ── Scan line animation ─────────────────────────────── */
+@keyframes scan {
+  0%, 100% { top: 12%; }
+  50% { top: 86%; }
+}
+
+/* ── Fade in ─────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.35s ease-out both; }
+.fade-in-1 { animation: fadeIn 0.35s ease-out 0.05s both; }
+.fade-in-2 { animation: fadeIn 0.35s ease-out 0.1s both; }
+.fade-in-3 { animation: fadeIn 0.35s ease-out 0.15s both; }
+
+/* ── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
+
+/* ── Footnote ────────────────────────────────────────── */
+.footnote {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  line-height: 1.55;
+}

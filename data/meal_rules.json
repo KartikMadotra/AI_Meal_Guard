@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "description": "Meal composition rules and scoring weights for AI MealGuard.",
+    "note": "Scoring weights and thresholds are project design choices, not official government standards.",
+    "version": "1.0"
+  },
+  "scoring_weights": {
+    "protein_adequacy": 0.30,
+    "energy_adequacy": 0.25,
+    "meal_components": 0.20,
+    "micronutrients": 0.15,
+    "portion_adequacy": 0.10
+  },
+  "status_thresholds": {
+    "pass": 75,
+    "review": 50,
+    "fail": 0
+  },
+  "meal_types": {
+    "lunch": {
+      "label": "Lunch",
+      "required_categories": ["cereal", "pulse"],
+      "recommended_categories": ["vegetable"],
+      "optional_categories": ["fruit", "dairy", "protein"],
+      "min_components": 3,
+      "portion_ranges_g": {
+        "cereal": { "min": 80, "ideal": 150, "max": 250 },
+        "pulse": { "min": 50, "ideal": 100, "max": 180 },
+        "vegetable": { "min": 40, "ideal": 75, "max": 150 },
+        "fruit": { "min": 30, "ideal": 80, "max": 150 },
+        "dairy": { "min": 50, "ideal": 100, "max": 200 },
+        "protein": { "min": 30, "ideal": 60, "max": 120 }
+      }
+    },
+    "breakfast": {
+      "label": "Breakfast",
+      "required_categories": ["cereal"],
+      "recommended_categories": ["dairy"],
+      "optional_categories": ["fruit", "protein", "vegetable"],
+      "min_components": 2,
+      "portion_ranges_g": {
+        "cereal": { "min": 60, "ideal": 120, "max": 200 },
+        "dairy": { "min": 80, "ideal": 150, "max": 250 },
+        "fruit": { "min": 30, "ideal": 80, "max": 150 },
+        "protein": { "min": 30, "ideal": 50, "max": 100 },
+        "vegetable": { "min": 30, "ideal": 60, "max": 120 }
+      }
+    },
+    "snack": {
+      "label": "Snack",
+      "required_categories": [],
+      "recommended_categories": ["fruit", "dairy"],
+      "optional_categories": ["cereal", "protein"],
+      "min_components": 1,
+      "portion_ranges_g": {
+        "cereal": { "min": 30, "ideal": 60, "max": 120 },
+        "dairy": { "min": 50, "ideal": 100, "max": 200 },
+        "fruit": { "min": 40, "ideal": 80, "max": 150 },
+        "protein": { "min": 20, "ideal": 40, "max": 80 }
+      }
+    }
+  },
+  "critical_nutrients": ["protein_g", "energy_kcal", "iron_mg"],
+  "micronutrient_keys": ["iron_mg", "calcium_mg", "vitamin_c_mg", "zinc_mg"]
+}
