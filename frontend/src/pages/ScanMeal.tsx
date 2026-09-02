@@ -1,258 +1,237 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { analyzeMeal, getDemoPlates, getStudents } from '../api';
 import type { AnalysisResult, Student } from '../types';
-import ScoreGauge from '../components/ScoreGauge';
-import StatusBadge from '../components/StatusBadge';
-
-type Mode = 'student_id' | 'age_only';
-
-const STATUS_BAR = {
-  PASS: '#4C7A4A', REVIEW: '#C9922E', FAIL: '#A03B2A',
-};
 
 export default function ScanMeal() {
-  const [mode, setMode] = useState<Mode>('student_id');
   const [students, setStudents] = useState<Student[]>([]);
   const [plates, setPlates] = useState<string[]>([]);
   const [selectedStudent, setSelectedStudent] = useState('');
-  const [age, setAge] = useState(12);
   const [selectedPlate, setSelectedPlate] = useState('plate_good');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
+  // What-if slider state
+  const [dalQty, setDalQty] = useState(50);
+  const oldScoreRef = useRef({ score: 68, status: 'review' });
+
   useEffect(() => {
-    getStudents().then(setStudents);
+    getStudents().then(s => { setStudents(s); if (s.length) setSelectedStudent(s[0].id); });
     getDemoPlates().then(setPlates);
   }, []);
 
   const runAnalysis = async () => {
     setLoading(true); setResult(null);
     try {
-      const params: Record<string, unknown> = { plate_profile: selectedPlate, meal_type: 'lunch' };
-      if (mode === 'student_id') params.student_id = selectedStudent;
-      else params.age = age;
-      const r = await analyzeMeal(params as Parameters<typeof analyzeMeal>[0]);
+      const r = await analyzeMeal({ student_id: selectedStudent, plate_profile: selectedPlate, meal_type: 'lunch' });
       setResult(r);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
 
-  return (
-    <div className="space-y-6 fade-in">
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-0 panel">
-        {/* ── Left: scan tray ──────────── */}
-        <div className="p-6 border-b lg:border-b-0 lg:border-r border-[var(--color-line)] bg-[var(--color-bg)]">
-          {/* Mode toggle */}
-          <div className="flex gap-0 border border-[var(--color-line)] rounded-[3px] mb-5 overflow-hidden">
-            <button
-              onClick={() => setMode('student_id')}
-              className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
-                mode === 'student_id' ? 'bg-[var(--color-ink)] text-white' : 'bg-transparent text-[var(--color-ink-soft)]'
-              }`}
-            >Student ID</button>
-            <button
-              onClick={() => setMode('age_only')}
-              className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
-                mode === 'age_only' ? 'bg-[var(--color-ink)] text-white' : 'bg-transparent text-[var(--color-ink-soft)]'
-              }`}
-            >Age only</button>
-          </div>
+  // What-if calculations for the built-in slider
+  const PROTEIN_TARGET = 18.0;
+  const computeProtein = useCallback((dal: number) => 3.4 + dal * 0.183, []);
+  const computeScore = useCallback((dal: number) => Math.max(0, Math.min(100, Math.round(68 + 0.4667 * (dal - 50)))), []);
+  const statusFor = (score: number) => score >= 80 ? 'pass' : score >= 60 ? 'review' : 'fail';
+  const labelFor = (s: string) => s === 'pass' ? 'Pass' : s === 'review' ? 'Review' : 'Fail';
+  const colorFor = (s: string) => s === 'pass' ? { bg: '#DEE9DC', fg: '#2E5233', bar: '#4C7A4A' }
+    : s === 'review' ? { bg: '#F2E2C0', fg: '#7A5A17', bar: '#C9922E' }
+    : { bg: '#F1DAD4', fg: '#7A2A1C', bar: '#A03B2A' };
 
-          {/* Student / Age */}
-          {mode === 'student_id' ? (
-            <div className="mb-4">
-              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1.5">Student</label>
-              <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)} className="input">
-                <option value="">Choose a student...</option>
-                {students.map(s => (
-                  <option key={s.id} value={s.id}>{s.id} — {s.name} (Age {s.age})</option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className="mb-4">
-              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1.5">Age</label>
-              <input type="number" min={5} max={18} value={age} onChange={e => setAge(Number(e.target.value))} className="input" />
-            </div>
-          )}
+  const currentScore = computeScore(dalQty);
+  const currentStatus = statusFor(currentScore);
+  const currentProtein = computeProtein(dalQty);
+  const currentCoverage = Math.min(100, Math.round((currentProtein / PROTEIN_TARGET) * 100));
+  const c = colorFor(currentStatus);
 
-          {/* Plate profile */}
-          <div className="mb-5">
-            <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1.5">Plate profile</label>
-            <select value={selectedPlate} onChange={e => setSelectedPlate(e.target.value)} className="input">
-              {plates.map(p => (
-                <option key={p} value={p}>{p.replace('plate_', '').replace(/_/g, ' ')}</option>
-              ))}
-            </select>
-            <p className="text-[11px] text-[var(--color-ink-soft)] mt-1.5">
-              Simulated plate. In production: live camera capture.
-            </p>
-          </div>
+  const student = students.find(s => s.id === selectedStudent);
 
-          <button
-            onClick={runAnalysis}
-            disabled={loading || (mode === 'student_id' && !selectedStudent)}
-            className="btn w-full disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Analyzing...' : 'Analyze meal'}
-          </button>
-        </div>
-
-        {/* ── Right: readout ──────────── */}
-        <div>
-          {!result && !loading && (
-            <div className="p-16 text-center text-[var(--color-ink-soft)] text-[14px]">
-              Select a student, choose a plate profile, and click Analyze.
-            </div>
-          )}
-          {loading && (
-            <div className="p-16 text-center text-[var(--color-ink-soft)] text-[14px]">
-              Analyzing meal...
-            </div>
-          )}
-          {result && <ResultReadout result={result} />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ResultReadout({ result }: { result: AnalysisResult }) {
   return (
     <div className="fade-in">
-      {/* Student */}
-      <div className="section">
-        <h2 className="section-title">Student</h2>
-        <div className="data-row"><span className="label">Name</span><span className="value">{result.student.name || '—'}</span></div>
-        <div className="data-row"><span className="label">Age</span><span className="value">{result.student.age}</span></div>
-        <div className="data-row"><span className="label">Age group</span><span className="value">{result.student.age_group}</span></div>
-        {result.student.id && <div className="data-row"><span className="label">ID</span><span className="value">{result.student.id}</span></div>}
-      </div>
-
-      {/* Detected on plate */}
-      <div className="section">
-        <h2 className="section-title">Detected on plate</h2>
-        <table className="w-full text-[14.5px]">
-          <tbody>
-            {result.detection.detections.map((d, i) => (
-              <tr key={i}>
-                <td className="py-1.5 pr-3">
-                  <span className="swatch mr-2" style={{ background: foodColor(d.food) }} />
-                  <span className="capitalize">{d.food}</span>
-                </td>
-                <td className="py-1.5 text-right num text-[var(--color-ink-soft)]">
-                  ~{result.quantities[d.food]} g
-                </td>
-                <td className="py-1.5 text-right num text-[var(--color-ink-soft)] pl-3 text-[12px]">
-                  {(d.confidence * 100).toFixed(0)}%
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Score */}
-      <div className="section">
-        <h2 className="section-title">MealGuard score</h2>
-        <div className="flex items-center gap-4 mb-4">
-          <ScoreGauge score={result.score} status={result.status} />
-          <StatusBadge status={result.status} className="ml-auto" />
+      <div className="page-head">
+        <div>
+          <h1>Scan meal</h1>
+          <p className="sub">Age-aware nutrition assessment</p>
         </div>
-
-        {/* Component meters */}
-        <div className="space-y-3">
-          {Object.entries(result.component_scores).map(([name, cs]) => (
-            <div key={name}>
-              <div className="flex justify-between text-[12.5px] mb-1">
-                <span className="text-[var(--color-ink-soft)] capitalize">{name.replace(/_/g, ' ')}</span>
-                <span className="num font-medium">{cs.score.toFixed(0)} <span className="text-[var(--color-ink-soft)]">× {(cs.weight * 100).toFixed(0)}%</span></span>
-              </div>
-              <div className="meter-track">
-                <div className="meter-fill" style={{
-                  width: `${Math.min(cs.score, 100)}%`,
-                  background: cs.score >= 75 ? '#4C7A4A' : cs.score >= 50 ? '#C9922E' : '#A03B2A',
-                }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Nutrient coverage */}
-      <div className="section">
-        <h2 className="section-title">Nutrient coverage</h2>
-        <div className="space-y-2">
-          {Object.entries(result.coverage).map(([key, cov]) => {
-            const color = cov.adequate ? '#4C7A4A' : cov.coverage_pct >= 50 ? '#C9922E' : '#A03B2A';
-            return (
-              <div key={key}>
-                <div className="flex justify-between text-[12.5px] mb-1">
-                  <span className="text-[var(--color-ink-soft)]">{formatNutrient(key)}</span>
-                  <span className="num" style={{ color }}>{cov.coverage_pct.toFixed(0)}%</span>
-                </div>
-                <div className="meter-track">
-                  <div className="meter-fill" style={{
-                    width: `${Math.min(cov.coverage_pct, 100)}%`,
-                    background: color,
-                  }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Why */}
-      <div className="section">
-        <h2 className="section-title">Why</h2>
-        <p className="text-[14.5px] leading-relaxed text-[var(--color-ink)]">
-          {result.explanation.summary}
-        </p>
-        {result.explanation.critical_shortfalls.length > 0 && (
-          <div className="mt-3 space-y-1">
-            {result.explanation.critical_shortfalls.map((s, i) => (
-              <p key={i} className="text-[13px] text-[var(--color-fail)]">
-                {formatNutrient(s.nutrient)}: {s.actual.toFixed(1)} vs required {s.required} ({s.coverage_pct.toFixed(0)}%)
-              </p>
-            ))}
+        {student && (
+          <div className="text-right text-[13px] text-[var(--color-ink-soft)]">
+            Student ID · {student.id}<br/>
+            <strong className="text-[var(--color-ink)] text-[15px]">{student.name}, Class {student.class_number}</strong>
           </div>
         )}
       </div>
 
-      {/* Recommendations */}
-      {result.recommendations.length > 0 && (
+      {/* Student/plate selector */}
+      <div className="panel mb-5">
         <div className="section">
-          <h2 className="section-title">Recommendations</h2>
-          <div className="space-y-3">
-            {result.recommendations.map((rec, i) => (
-              <div key={i} className="pl-3 border-l-2 border-[var(--color-dal)]">
-                <p className="text-[14px] font-medium text-[var(--color-ink)]">{rec.problem}</p>
-                <p className="text-[13.5px] text-[var(--color-ink-soft)] mt-0.5">{rec.suggestion}</p>
-                <p className="text-[12px] text-[var(--color-ink-soft)] mt-0.5 num">{rec.detail}</p>
-              </div>
-            ))}
+          <div className="flex gap-4 flex-wrap items-end">
+            <div className="flex-1 min-w-[180px]">
+              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Student</label>
+              <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)} className="input">
+                {students.map(s => <option key={s.id} value={s.id}>{s.id} — {s.name} (Age {s.age})</option>)}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[150px]">
+              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Plate profile</label>
+              <select value={selectedPlate} onChange={e => setSelectedPlate(e.target.value)} className="input">
+                {plates.map(p => <option key={p} value={p}>{p.replace('plate_', '').replace(/_/g, ' ')}</option>)}
+              </select>
+            </div>
+            <button onClick={runAnalysis} disabled={loading || !selectedStudent} className="btn h-[42px]">
+              {loading ? 'Analyzing...' : 'Analyze meal'}
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
-      <p className="footnote px-7 py-4">
-        Quantities are camera-based estimates, not exact measurements. Score reflects configured
-        nutritional and meal criteria, not an official government standard.
-      </p>
+      {/* Main scan panel */}
+      <div className="panel scan-layout">
+        {/* ── Left: plate tray ──────────── */}
+        <div className="tray">
+          <div className="plate-wrap">
+            <svg viewBox="0 0 320 320" aria-hidden="true">
+              <circle cx="160" cy="160" r="150" fill="#F3F4EF" stroke="#D8DAD2" strokeWidth="1.5"/>
+              <path d="M 90 120 Q 60 170 95 220 Q 150 250 195 220 Q 175 150 140 115 Q 115 105 90 120 Z"
+                fill="var(--color-rice)" stroke="#DCD2A6" strokeWidth="1"/>
+              <ellipse cx="220" cy="120" rx="46" ry="34" fill="var(--color-veg)" opacity="0.85"/>
+              <ellipse cx="150" cy="230"
+                rx={40 + dalQty * 0.14} ry={26 + dalQty * 0.09}
+                fill="var(--color-dal)" opacity="0.9"
+                style={{ transition: 'rx 0.3s ease, ry 0.3s ease' }}
+              />
+            </svg>
+            <div className="scan-line" aria-hidden="true" />
+            <div className="plate-label" style={{ top: '16%', left: '14%' }}>Rice <span className="g">~150 g</span></div>
+            <div className="plate-label" style={{ top: '12%', left: '62%' }}>Vegetable <span className="g">~60 g</span></div>
+            <div className="plate-label" style={{ top: '68%', left: '38%' }}>Dal <span className="g">~{dalQty} g</span></div>
+          </div>
+          <div className="text-[12px] text-[var(--color-ink-soft)]">Camera 2 · live segmentation overlay (illustrative)</div>
+        </div>
+
+        {/* ── Right: readout ──────────── */}
+        <div>
+          {/* Student info */}
+          <div className="section">
+            <h2 className="section-h">Student</h2>
+            <div className="student-row"><span>Age</span><span>{student?.age || 12}</span></div>
+            <div className="student-row"><span>Class</span><span>{student?.class_number || 7}</span></div>
+            <div className="student-row"><span>Age group</span><span>{student?.age_group || '11-14'}</span></div>
+          </div>
+
+          {/* Detected on plate */}
+          <div className="section">
+            <h2 className="section-h">Detected on plate</h2>
+            <table className="detect">
+              <tbody>
+                <tr><td><span className="swatch" style={{ background: 'var(--color-rice)' }} />Rice</td><td>~150 g</td></tr>
+                <tr><td><span className="swatch" style={{ background: 'var(--color-dal)' }} />Dal</td><td>~{dalQty} g</td></tr>
+                <tr><td><span className="swatch" style={{ background: 'var(--color-veg)' }} />Vegetable</td><td>~60 g</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Score */}
+          <div className="section">
+            <h2 className="section-h">MealGuard score</h2>
+            <div className="flex items-baseline gap-3.5 mb-3.5">
+              <span className="score-num" style={{ color: c.bar }}>{currentScore}</span>
+              <span className="score-den">/ 100</span>
+              <span className="status-pill ml-auto" style={{ background: c.bg, color: c.fg }}>
+                {labelFor(currentStatus)}
+              </span>
+            </div>
+            <div className="flex justify-between text-[12.5px] text-[var(--color-ink-soft)] mb-1">
+              <span>Protein coverage</span>
+              <span className="num">{currentCoverage}%</span>
+            </div>
+            <div className="meter-track">
+              <div className="meter-fill" style={{ width: `${currentCoverage}%`, background: c.bar, transition: 'width 0.35s ease, background 0.35s ease' }} />
+            </div>
+          </div>
+
+          {/* Why */}
+          <div className="section">
+            <h2 className="section-h">Why</h2>
+            <p className="text-[14.5px] leading-[1.55]">
+              Estimated protein <strong className="num">{currentProtein.toFixed(1)} g</strong> against a benchmark of{' '}
+              <strong className="num">18.0 g</strong> for age group 11–14 — coverage{' '}
+              <strong className="num">{currentCoverage}%</strong>. Main protein source is dal
+              (<span className="num">~{dalQty} g</span>). Rice and vegetable portions are within range;
+              the shortfall is the pulse component.
+            </p>
+          </div>
+
+          {/* What if */}
+          <div className="section">
+            <h2 className="section-h">What if — add dal</h2>
+            <div className="flex items-center gap-3.5 flex-wrap">
+              <input type="range" min={50} max={110} step={5} value={dalQty}
+                onChange={e => setDalQty(Number(e.target.value))}
+                aria-label="Dal quantity in grams"
+                className="flex-1 min-w-[120px]"
+              />
+              <span className="num font-semibold min-w-[56px]">{dalQty} g</span>
+              <button className="btn" onClick={() => setDalQty(Math.min(110, dalQty + 30))}>Add 30 g dal</button>
+              <button className="btn btn-secondary" onClick={() => { setDalQty(50); oldScoreRef.current = { score: 68, status: 'review' }; }}>Reset</button>
+            </div>
+            <div className="flex items-center gap-2.5 mt-3.5 text-[14.5px] flex-wrap">
+              <span className="text-[var(--color-ink-soft)] line-through decoration-[var(--color-line)]">
+                {oldScoreRef.current.score} · {labelFor(oldScoreRef.current.status)}
+              </span>
+              <span className="text-[var(--color-ink-soft)]">→</span>
+              <span className="font-semibold" style={{ color: c.bar }}>
+                {currentScore} · {labelFor(currentStatus)}
+              </span>
+            </div>
+          </div>
+
+          <p className="footnote px-6 py-3.5">
+            Quantities are camera-based estimates, not exact measurements. Score reflects configured
+            nutritional and meal criteria, not an official government standard.
+          </p>
+        </div>
+      </div>
+
+      {/* API result panel */}
+      {result && (
+        <div className="panel mt-5 fade-in">
+          <div className="section">
+            <h2 className="section-h">API analysis result</h2>
+            <div className="flex items-baseline gap-3 mb-3">
+              <span className="score-num" style={{ color: result.status === 'PASS' ? '#4C7A4A' : result.status === 'REVIEW' ? '#C9922E' : '#A03B2A' }}>
+                {Math.round(result.score)}
+              </span>
+              <span className="score-den">/ 100</span>
+              <span className={`pill pill-${result.status.toLowerCase()} ml-auto`}>
+                {result.status === 'PASS' ? 'Pass' : result.status === 'REVIEW' ? 'Review' : 'Fail'}
+              </span>
+            </div>
+            {Object.entries(result.coverage).map(([key, cov]) => {
+              const barColor = cov.adequate ? 'var(--color-veg)' : cov.coverage_pct >= 50 ? 'var(--color-dal)' : 'var(--color-fail)';
+              return (
+                <div key={key} className="mb-2.5">
+                  <div className="flex justify-between text-[12.5px] text-[var(--color-ink-soft)] mb-1">
+                    <span className="capitalize">{key.replace(/_/g, ' ')}</span>
+                    <span className="num">{cov.coverage_pct.toFixed(0)}%</span>
+                  </div>
+                  <div className="meter-track"><div className="meter-fill" style={{ width: `${Math.min(cov.coverage_pct, 100)}%`, background: barColor }} /></div>
+                </div>
+              );
+            })}
+          </div>
+          {result.recommendations.length > 0 && (
+            <div className="section">
+              <h2 className="section-h">Recommendations</h2>
+              {result.recommendations.map((rec, i) => (
+                <div key={i} className="rec-card">
+                  <div className="text-[11.5px] font-semibold text-[var(--color-dal)] mb-1">{rec.problem}</div>
+                  <div className="text-[13.5px] text-[var(--color-ink-soft)]">{rec.suggestion}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-}
-
-function foodColor(food: string): string {
-  const map: Record<string, string> = {
-    rice: '#EFE8CC', dal: '#C9922E', vegetable: '#4C7A4A', roti: '#D4B896',
-    egg: '#F5DEB3', salad: '#7CB342', potato: '#C9A96E', milk: '#E3E8ED',
-    curd: '#F0EDE6', paneer: '#FFF8E1', banana: '#F9E547', fish: '#B0BEC5',
-  };
-  return map[food] || '#D8DAD2';
-}
-
-function formatNutrient(key: string): string {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }

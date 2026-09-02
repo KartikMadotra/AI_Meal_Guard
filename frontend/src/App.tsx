@@ -1,31 +1,33 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import TopNav from './components/TopNav';
+import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import ScanMeal from './pages/ScanMeal';
+import NutritionAnalysis from './pages/NutritionAnalysis';
 import MealHistory from './pages/MealHistory';
 import StudentsPage from './pages/StudentsPage';
 import FoodDatabase from './pages/FoodDatabase';
 import AgeRequirements from './pages/AgeRequirements';
-import WhatIfPage from './pages/WhatIfPage';
+import Recommendations from './pages/Recommendations';
 import SettingsPage from './pages/SettingsPage';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[var(--color-bg)]">
-        <TopNav />
-        <main className="max-w-[1180px] mx-auto px-6 py-7">
+      <div className="shell">
+        <Sidebar />
+        <div className="main-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/scan" element={<ScanMeal />} />
+            <Route path="/nutrition" element={<NutritionAnalysis />} />
             <Route path="/students" element={<StudentsPage />} />
-            <Route path="/history" element={<MealHistory />} />
-            <Route path="/foods" element={<FoodDatabase />} />
             <Route path="/age-groups" element={<AgeRequirements />} />
-            <Route path="/what-if" element={<WhatIfPage />} />
+            <Route path="/foods" element={<FoodDatabase />} />
+            <Route path="/history" element={<MealHistory />} />
+            <Route path="/recs" element={<Recommendations />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
-        </main>
+        </div>
       </div>
     </BrowserRouter>
   );

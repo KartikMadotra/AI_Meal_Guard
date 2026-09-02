@@ -1,136 +1,131 @@
 import { useEffect, useState } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, PieChart, Pie, Cell,
-} from 'recharts';
-import { getDashboardStats } from '../api';
-import type { DashboardStats } from '../types';
-
-const PIE_COLORS = ['#4C7A4A', '#C9922E', '#A03B2A'];
+import { getDashboardStats, getMealHistory } from '../api';
+import type { DashboardStats, MealRecord } from '../types';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recent, setRecent] = useState<MealRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getDashboardStats().then(setStats).finally(() => setLoading(false));
+    Promise.all([
+      getDashboardStats(),
+      getMealHistory({ limit: 5, offset: 0 }),
+    ]).then(([s, h]) => {
+      setStats(s);
+      setRecent(h.meals);
+    }).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <Skeleton />;
-  if (!stats) return <p className="text-[var(--color-ink-soft)] py-8">Failed to load dashboard.</p>;
+  if (loading) return <LoadingSkeleton />;
+  if (!stats) return <p className="text-[var(--color-ink-soft)] py-8">Failed to load.</p>;
 
-  const pieData = [
-    { name: 'Pass',   value: stats.status_distribution.PASS },
-    { name: 'Review', value: stats.status_distribution.REVIEW },
-    { name: 'Fail',   value: stats.status_distribution.FAIL },
-  ];
-
-  const barData = Object.entries(stats.score_distribution).map(([range, count]) => ({
-    range, count,
-  }));
+  const pass = stats.status_percentages.PASS;
+  const review = stats.status_percentages.REVIEW;
+  const fail = stats.status_percentages.FAIL;
 
   return (
-    <div className="space-y-6 fade-in">
-      {/* ── Stat cards ────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 panel">
-        <StatCell label="Meals analyzed" value={String(stats.total_meals)} border />
-        <StatCell label="Average score" value={String(stats.average_score)} suffix="/ 100" border />
-        <StatCell label="Pass rate" value={`${stats.status_percentages.PASS}%`} color="#4C7A4A" border />
-        <StatCell label="Fail rate" value={`${stats.status_percentages.FAIL}%`} color="#A03B2A" />
-      </div>
-
-      {/* ── Charts row ────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 panel">
-        {/* Status Pie */}
-        <div className="p-6 border-b lg:border-b-0 lg:border-r border-[var(--color-line)]">
-          <h2 className="section-title mb-4">Status distribution</h2>
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={52} outerRadius={88}
-                paddingAngle={3} dataKey="value" stroke="none">
-                {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
-              </Pie>
-              <Tooltip
-                contentStyle={{ background: '#fff', border: '1px solid #D8DAD2', borderRadius: 3, fontSize: 13 }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center gap-5 mt-1">
-            {pieData.map((d, i) => (
-              <div key={d.name} className="flex items-center gap-2 text-[13px] text-[var(--color-ink-soft)]">
-                <span className="swatch" style={{ background: PIE_COLORS[i] }} />
-                {d.name} ({d.value})
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Score Bar */}
-        <div className="p-6">
-          <h2 className="section-title mb-4">Score distribution</h2>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={barData} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-line)" />
-              <XAxis dataKey="range" tick={{ fill: '#5B6158', fontSize: 12 }} axisLine={false} />
-              <YAxis tick={{ fill: '#5B6158', fontSize: 12 }} axisLine={false} />
-              <Tooltip contentStyle={{ background: '#fff', border: '1px solid #D8DAD2', borderRadius: 3, fontSize: 13 }} />
-              <Bar dataKey="count" fill="var(--color-dal)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+    <div className="fade-in">
+      <div className="page-head">
+        <div>
+          <h1>School meal dashboard</h1>
+          <p className="sub">Aggregate results across all scanned meals</p>
         </div>
       </div>
 
-      {/* ── Common issues ─────────────────────── */}
-      <div className="panel">
+      <div className="panel" style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* ── KPIs ─────────── */}
         <div className="section">
-          <h2 className="section-title">Common nutritional issues</h2>
-          <div className="space-y-4">
-            {stats.common_issues.map((issue, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[14px] text-[var(--color-ink)]">{issue.issue}</span>
-                  <span className="text-[13px] font-medium num text-[var(--color-dal)]">{issue.percentage}%</span>
-                </div>
-                <div className="meter-track">
-                  <div className="meter-fill" style={{
-                    width: `${Math.min(issue.percentage, 100)}%`,
-                    background: issue.percentage > 80 ? 'var(--color-fail)' : 'var(--color-dal)',
-                  }} />
-                </div>
-              </div>
-            ))}
+          <div className="flex gap-8 flex-wrap">
+            <KPI value={stats.total_meals.toLocaleString()} label="Meals analyzed" />
+            <KPI value={String(Math.round(stats.average_score))} label="Average score" />
+            <KPI value={`${pass}%`} label="Pass rate" />
           </div>
         </div>
-        <p className="footnote px-7 py-4">
-          Issues are calculated from all analyzed meals. A 100% rate means every recorded meal exhibited this shortfall.
-        </p>
+
+        {/* ── Outcomes bar ─── */}
+        <div className="section fade-in-1">
+          <h2 className="section-h">Outcomes</h2>
+          <div className="stacked-bar">
+            <div style={{ width: `${pass}%`, background: 'var(--color-veg)' }} />
+            <div style={{ width: `${review}%`, background: 'var(--color-dal)' }} />
+            <div style={{ width: `${fail}%`, background: 'var(--color-fail)' }} />
+          </div>
+          <div className="flex gap-[18px] mt-2.5 flex-wrap text-[12.5px] text-[var(--color-ink-soft)]">
+            <span><span className="legend-dot" style={{ background: 'var(--color-veg)' }} />Pass — {pass}%</span>
+            <span><span className="legend-dot" style={{ background: 'var(--color-dal)' }} />Review — {review}%</span>
+            <span><span className="legend-dot" style={{ background: 'var(--color-fail)' }} />Fail — {fail}%</span>
+          </div>
+        </div>
+
+        {/* ── Common issues ── */}
+        <div className="section fade-in-2 meter-animate">
+          <h2 className="section-h">Common issues</h2>
+          {stats.common_issues.map((issue, i) => (
+            <div key={i} className="mb-3 last:mb-0">
+              <div className="flex justify-between text-[13.5px] mb-[5px]">
+                <span>{issue.issue}</span>
+                <span className="num">{issue.percentage}%</span>
+              </div>
+              <div className="meter-track">
+                <div className="meter-fill" style={{
+                  width: `${issue.percentage}%`,
+                  background: issue.percentage > 60 ? 'var(--color-fail)' : 'var(--color-dal)',
+                }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Recent scans ─── */}
+        <div className="section fade-in-3">
+          <h2 className="section-h">Recent scans</h2>
+          {recent.map((m) => {
+            const d = new Date(m.analysis_date);
+            const status = m.status.toLowerCase() as 'pass' | 'review' | 'fail';
+            const scoreColor = status === 'pass' ? '#2E5233' : status === 'review' ? '#7A5A17' : '#7A2A1C';
+            return (
+              <div key={m.id} className="hist-item">
+                <span className="w-[70px] shrink-0 text-[var(--color-ink-soft)] num text-[13px]">
+                  {d.getDate().toString().padStart(2, '0')} {d.toLocaleString('en', { month: 'short' })}
+                </span>
+                <span className="flex-1">
+                  <span className="font-medium">{m.student_id || '—'}</span>
+                  <span className="text-[12.5px] text-[var(--color-ink-soft)]"> · age {m.student_age}</span>
+                </span>
+                <span className="num font-semibold w-10 text-right" style={{ color: scoreColor }}>{Math.round(m.score)}</span>
+                <span className={`pill pill-${status} ml-3`}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
 
-function StatCell({ label, value, suffix, color, border }: {
-  label: string; value: string; suffix?: string; color?: string; border?: boolean;
-}) {
+function KPI({ value, label }: { value: string; label: string }) {
   return (
-    <div className={`p-5 ${border ? 'border-r border-[var(--color-line)]' : ''}`}>
-      <p className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider mb-2">{label}</p>
-      <div className="flex items-baseline gap-2">
-        <span className="heading-serif text-[32px] leading-none" style={{ color: color || 'var(--color-ink)' }}>
-          {value}
-        </span>
-        {suffix && <span className="text-[13px] text-[var(--color-ink-soft)]">{suffix}</span>}
-      </div>
+    <div>
+      <div className="kpi-num">{value}</div>
+      <div className="kpi-label">{label}</div>
     </div>
   );
 }
 
-function Skeleton() {
+function LoadingSkeleton() {
   return (
-    <div className="panel">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="p-5 border-b border-[var(--color-line)] h-20 bg-[var(--color-bg)] animate-pulse" />
-      ))}
+    <div>
+      <div className="page-head">
+        <div><h1>School meal dashboard</h1><p className="sub">Loading...</p></div>
+      </div>
+      <div className="panel">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="section h-20 animate-pulse bg-[var(--color-bg)]" />
+        ))}
+      </div>
     </div>
   );
 }

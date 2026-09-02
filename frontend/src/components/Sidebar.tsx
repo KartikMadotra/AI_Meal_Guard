@@ -1,63 +1,34 @@
 import { NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard, ScanLine, Users, BookOpen,
-  UtensilsCrossed, History, Settings, Lightbulb, FlaskConical,
-} from 'lucide-react';
 
 const NAV = [
-  { to: '/',            icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/scan',        icon: ScanLine,        label: 'Scan Meal' },
-  { to: '/students',    icon: Users,           label: 'Students' },
-  { to: '/history',     icon: History,         label: 'Meal History' },
-  { to: '/foods',       icon: UtensilsCrossed, label: 'Food Database' },
-  { to: '/age-groups',  icon: BookOpen,        label: 'Age Requirements' },
-  { to: '/what-if',     icon: FlaskConical,    label: 'What-If' },
-  { to: '/settings',    icon: Settings,        label: 'Settings' },
+  { to: '/',            label: 'Dashboard',          icon: <svg viewBox="0 0 20 20"><path d="M3 16V9M9 16V4M15 16v-6"/></svg> },
+  { to: '/scan',        label: 'Scan meal',          icon: <svg viewBox="0 0 20 20"><rect x="2.5" y="6" width="15" height="10" rx="1.5"/><path d="M7 6l1.2-2h3.6L13 6"/><circle cx="10" cy="11" r="2.6"/></svg> },
+  { to: '/nutrition',   label: 'Nutrition analysis',  icon: <svg viewBox="0 0 20 20"><path d="M15 3c1 5-1 10-6 12-3 1-6-1-6-4 2 1 4 0 5-2C4 8 4 5 6 3c1 3 3 3 4 1 1 2 3 1 5-1z"/></svg> },
+  { to: '/students',    label: 'Students',           icon: <svg viewBox="0 0 20 20"><circle cx="7" cy="7" r="2.6"/><circle cx="14" cy="8" r="2.1"/><path d="M2.5 16c0-2.8 2-4.5 4.5-4.5s4.5 1.7 4.5 4.5M12 16c0-2.2 1.6-3.6 3.5-3.6s3.5 1.4 3.5 3.6"/></svg> },
+  { to: '/age-groups',  label: 'Age requirements',   icon: <svg viewBox="0 0 20 20"><path d="M10 5C8 3.8 5 3.5 3 4v11c2-.5 5-.2 7 1 2-1.2 5-1.5 7-1V4c-2 .5-5 .8-7 2z"/><path d="M10 5v11"/></svg> },
+  { to: '/foods',       label: 'Food database',      icon: <svg viewBox="0 0 20 20"><path d="M3 6h14M3 10h14M3 14h14"/></svg> },
+  { to: '/history',     label: 'Meal history',       icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.2"/><path d="M10 6v4l3 2"/></svg> },
+  { to: '/recs',        label: 'Recommendations',    icon: <svg viewBox="0 0 20 20"><path d="M10 3a4.5 4.5 0 0 1 2.5 8.2c-.4.3-.7.9-.7 1.5v.3h-3.6v-.3c0-.6-.3-1.2-.7-1.5A4.5 4.5 0 0 1 10 3z"/><path d="M8.3 15.5h3.4M9 17.3h2"/></svg> },
+  { to: '/settings',    label: 'Settings',           icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.6"/><path d="M10 3v2M10 15v2M17 10h-2M5 10H3M14.9 5.1l-1.4 1.4M6.5 13.5l-1.4 1.4M14.9 14.9l-1.4-1.4M6.5 6.5L5.1 5.1"/></svg> },
 ];
 
 export default function Sidebar() {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#0d1220] border-r border-white/[.06] flex flex-col z-50">
-      {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/[.06]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-            M
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white tracking-tight">MealGuard</h1>
-            <p className="text-[11px] text-cyan-400/80 font-medium tracking-wide">SDG 2 • AI-Powered</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {NAV.map(({ to, icon: Icon, label }) => (
+    <div className="sidebar">
+      <div className="brand">AI MealGuard</div>
+      <nav className="flex flex-col gap-px">
+        {NAV.map(({ to, label, icon }) => (
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-               ${isActive
-                 ? 'bg-cyan-500/10 text-cyan-400 shadow-lg shadow-cyan-500/5'
-                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[.04]'
-               }`
-            }
+            end={to === '/'}
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
-            <Icon size={18} />
+            {icon}
             {label}
           </NavLink>
         ))}
       </nav>
-
-      {/* Footer */}
-      <div className="px-6 py-4 border-t border-white/[.06]">
-        <div className="flex items-center gap-2">
-          <Lightbulb size={14} className="text-amber-400" />
-          <span className="text-xs text-slate-500">SDG 2 — Zero Hunger</span>
-        </div>
-      </div>
-    </aside>
+    </div>
   );
 }
