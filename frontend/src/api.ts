@@ -57,6 +57,7 @@ export async function analyzeMeal(params: {
   age?: number;
   meal_type?: string;
   plate_profile?: string;
+  image_data?: string;
 }): Promise<AnalysisResult> {
   return fetchJSON<AnalysisResult>(`${BASE}/analyze`, {
     method: 'POST',

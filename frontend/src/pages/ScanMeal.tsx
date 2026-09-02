@@ -1,43 +1,104 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { analyzeMeal, getDemoPlates, getStudents } from '../api';
+import { analyzeMeal, getStudents, getAgeGroup } from '../api';
 import type { AnalysisResult, Student } from '../types';
 
-// Demo plate descriptions so user knows what each profile simulates
-const PLATE_INFO: Record<string, { label: string; desc: string; foods: string; expected: string }> = {
-  plate_good:     { label: 'Good Plate',     desc: 'Balanced meal with adequate portions',        foods: 'Rice 150g + Dal 90g + Vegetable 70g',   expected: '~82 PASS' },
-  plate_ok:       { label: 'OK Plate',       desc: 'Slightly low on protein/dal',                 foods: 'Rice 180g + Dal 50g + Vegetable 60g',   expected: '~68 REVIEW' },
-  plate_poor:     { label: 'Poor Plate',     desc: 'Very low dal, missing nutrients',             foods: 'Rice 200g + Dal 25g + Vegetable 40g',   expected: '~45 FAIL' },
-  plate_minimal:  { label: 'Minimal Plate',  desc: 'Just rice, almost no dal or veg',             foods: 'Rice 220g + Dal 15g + Vegetable 20g',   expected: '~30 FAIL' },
-  plate_surplus:  { label: 'Surplus Plate',  desc: 'Extra-large portions, exceeds benchmarks',    foods: 'Rice 200g + Dal 120g + Vegetable 100g', expected: '~90 PASS' },
-};
+type CaptureMode = 'camera' | 'upload' | null;
+type IdMode = 'student_id' | 'age';
 
 export default function ScanMeal() {
   const [students, setStudents] = useState<Student[]>([]);
-  const [plates, setPlates] = useState<string[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState('');
-  const [selectedPlate, setSelectedPlate] = useState('plate_good');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+
+  const [captureMode, setCaptureMode] = useState<CaptureMode>(null);
+  const [idMode, setIdMode] = useState<IdMode>('student_id');
+  const [studentId, setStudentId] = useState('');
+  const [ageValue, setAgeValue] = useState<number>(12);
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // What-if slider state
+  // What-if state
   const [dalQty, setDalQty] = useState(50);
   const oldScoreRef = useRef({ score: 68, status: 'review' });
 
   useEffect(() => {
-    getStudents().then(s => { setStudents(s); if (s.length) setSelectedStudent(s[0].id); });
-    getDemoPlates().then(setPlates);
+    getStudents().then(s => {
+      setStudents(s);
+      if (s.length > 0) setStudentId(s[0].id);
+    });
+    // Stop camera on unmount
+    return () => stopCamera();
   }, []);
 
-  const runAnalysis = async (plateOverride?: string) => {
-    const plate = plateOverride || selectedPlate;
-    setLoading(true); setResult(null);
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const startCamera = async () => {
+    stopCamera();
+    setCaptureMode('camera');
+    setUploadedImage(null);
+    setResult(null);
     try {
-      const r = await analyzeMeal({ student_id: selectedStudent, plate_profile: plate, meal_type: 'lunch' });
-      setResult(r);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      // Speak the prompt and listen for response
+      if ('speechSynthesis' in window) {
+        const text = idMode === 'age' ? 'Tell me your age.' : 'Tell me your student ID.';
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        utterance.onend = () => {
+          const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+          if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            
+            recognition.onresult = (event: any) => {
+              const transcript = event.results[0][0].transcript.trim().toLowerCase();
+              console.log("Speech heard:", transcript);
+              
+              if (idMode === 'age') {
+                const match = transcript.match(/\d+/);
+                if (match) setAgeValue(parseInt(match[0], 10));
+              } else {
+                const match = transcript.match(/\d+/);
+                if (match) {
+                  const found = students.find(s => s.id.includes(match[0]));
+                  if (found) setStudentId(found.id);
+                }
+              }
+            };
+            recognition.start();
+          }
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.error("Camera access denied or unavailable", err);
+      alert("Camera access is required for this mode.");
+      setCaptureMode(null);
+    }
+  };
+
+  const handleUploadClick = () => {
+    stopCamera();
+    setCaptureMode('upload');
+    setResult(null);
+    fileInputRef.current?.click();
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,10 +107,58 @@ export default function ScanMeal() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setUploadedImage(ev.target?.result as string);
-      // Still uses mock detection — real YOLO model would analyze the image
-      runAnalysis();
     };
     reader.readAsDataURL(file);
+  };
+
+  const captureFrame = (): string | null => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', 0.8);
+      }
+    }
+    return null;
+  };
+
+  const runAnalysis = async () => {
+    if (idMode === 'student_id' && !studentId) {
+      alert("Please select a student ID.");
+      return;
+    }
+    
+    setLoading(true);
+    setResult(null);
+    
+    let imageData = undefined;
+    if (captureMode === 'camera') {
+      imageData = captureFrame() || undefined;
+    } else if (captureMode === 'upload') {
+      imageData = uploadedImage || undefined;
+    }
+
+    try {
+      // If we are testing with mock backend, we use random quantities generated by backend.
+      // We pass the appropriate identifiers.
+      const r = await analyzeMeal({
+        student_id: idMode === 'student_id' ? studentId : undefined,
+        age: idMode === 'age' ? ageValue : undefined,
+        meal_type: 'lunch',
+        image_data: imageData
+      });
+      setResult(r);
+      // Initialize dal quantity for what-if based on results
+      setDalQty(r.quantities['dal'] || 50);
+    } catch (e: any) { 
+      console.error(e); 
+      alert(e.message || "Failed to analyze meal.");
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   // What-if calculations
@@ -67,246 +176,184 @@ export default function ScanMeal() {
   const currentProtein = computeProtein(dalQty);
   const currentCoverage = Math.min(100, Math.round((currentProtein / PROTEIN_TARGET) * 100));
   const c = colorFor(currentStatus);
-  const student = students.find(s => s.id === selectedStudent);
+
+  const student = students.find(s => s.id === studentId);
+  const displayAge = idMode === 'student_id' ? (student?.age || '-') : ageValue;
+  const displayAgeGroup = idMode === 'student_id' ? (student?.age_group || '-') : (ageValue < 9 ? '6-8' : ageValue < 11 ? '9-10' : ageValue < 15 ? '11-14' : '15-17');
 
   return (
     <div className="fade-in">
       <div className="page-head">
         <div>
           <h1>Scan meal</h1>
-          <p className="sub">Age-aware nutrition assessment</p>
+          <p className="sub">Capture a plate and verify nutrition instantly.</p>
         </div>
-        {student && (
-          <div className="text-right text-[13px] text-[var(--color-ink-soft)]">
-            Student ID · {student.id}<br/>
-            <strong className="text-[var(--color-ink)] text-[15px]">{student.name}, Class {student.class_number}</strong>
-          </div>
-        )}
       </div>
 
-      {/* ── Student + controls ──────── */}
+      {/* ── Settings ──────── */}
       <div className="panel mb-5">
         <div className="section">
           <div className="flex gap-4 flex-wrap items-end">
-            <div className="flex-1 min-w-[180px]">
-              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Student</label>
-              <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)} className="input">
-                {students.map(s => <option key={s.id} value={s.id}>{s.id} — {s.name} (Age {s.age})</option>)}
+            <div className="min-w-[180px]">
+              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Identification Feature</label>
+              <select value={idMode} onChange={e => setIdMode(e.target.value as IdMode)} className="input">
+                <option value="student_id">Student ID (Registered Users)</option>
+                <option value="age">Age Only (Anonymous)</option>
               </select>
             </div>
-            <div>
-              <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Or upload image</label>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload}
-                className="text-[13px] text-[var(--color-ink-soft)]" />
-            </div>
+            
+            {idMode === 'student_id' ? (
+              <div className="flex-1 min-w-[180px]">
+                <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Select Student</label>
+                <select value={studentId} onChange={e => setStudentId(e.target.value)} className="input">
+                  <option value="" disabled>-- Select a Student --</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.id} — {s.name} (Age {s.age})</option>)}
+                </select>
+                {students.length === 0 && (
+                  <p className="text-[11px] text-[var(--color-fail)] mt-1">No students registered yet. Go to Students tab.</p>
+                )}
+              </div>
+            ) : (
+              <div className="flex-1 min-w-[180px]">
+                <label className="text-[12px] text-[var(--color-ink-soft)] uppercase tracking-wider block mb-1">Enter Age</label>
+                <input type="number" min={5} max={18} value={ageValue} onChange={e => setAgeValue(Number(e.target.value))} className="input w-24" />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ── Demo plate gallery ──────── */}
+      {/* ── Capture Actions ──────── */}
       <div className="panel mb-5">
         <div className="section">
-          <h2 className="section-h">Test without a real meal — pick a demo plate</h2>
-          <p className="text-[13px] text-[var(--color-ink-soft)] mb-4">
-            Click any plate below to instantly run analysis. No camera or real food needed.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {Object.entries(PLATE_INFO).map(([key, info]) => {
-              const isSelected = selectedPlate === key;
-              const statusColor = info.expected.includes('PASS') ? 'var(--color-veg)' :
-                info.expected.includes('REVIEW') ? 'var(--color-dal)' : 'var(--color-fail)';
-              return (
-                <button
-                  key={key}
-                  onClick={() => { setSelectedPlate(key); setUploadedImage(null); runAnalysis(key); }}
-                  disabled={loading || !selectedStudent}
-                  className={`text-left p-4 border rounded-[3px] transition-all cursor-pointer disabled:opacity-40 ${
-                    isSelected ? 'border-[var(--color-ink)] bg-[#F4F5F1]' : 'border-[var(--color-line)] bg-white hover:border-[var(--color-ink-soft)] hover:bg-[#FAFBF9]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-medium text-[14px]">{info.label}</span>
-                    <span className="text-[12px] font-semibold num" style={{ color: statusColor }}>{info.expected}</span>
-                  </div>
-                  <p className="text-[12.5px] text-[var(--color-ink-soft)] mb-1.5">{info.desc}</p>
-                  <p className="text-[11.5px] text-[var(--color-ink-soft)] num">{info.foods}</p>
-                </button>
-              );
-            })}
+          <div className="flex gap-4">
+            <button 
+              onClick={startCamera} 
+              className={`flex-1 p-6 border rounded-[3px] font-medium text-center transition-all cursor-pointer ${captureMode === 'camera' ? 'border-[var(--color-ink)] bg-[#F4F5F1]' : 'border-[var(--color-line)] bg-white hover:border-[var(--color-ink-soft)] hover:bg-[#FAFBF9]'}`}
+            >
+              <span className="block text-xl mb-2">📷</span>
+              Use Camera
+            </button>
+            <button 
+              onClick={handleUploadClick} 
+              className={`flex-1 p-6 border rounded-[3px] font-medium text-center transition-all cursor-pointer ${captureMode === 'upload' ? 'border-[var(--color-ink)] bg-[#F4F5F1]' : 'border-[var(--color-line)] bg-white hover:border-[var(--color-ink-soft)] hover:bg-[#FAFBF9]'}`}
+            >
+              <span className="block text-xl mb-2">🖼️</span>
+              Upload Picture
+            </button>
           </div>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
         </div>
       </div>
 
-      {/* ── Uploaded image preview ──── */}
-      {uploadedImage && (
+      {/* ── Capture View ──── */}
+      {captureMode && (
         <div className="panel mb-5 fade-in">
-          <div className="section">
-            <h2 className="section-h">Uploaded image</h2>
-            <img src={uploadedImage} alt="Uploaded meal"
-              className="max-w-[400px] max-h-[300px] rounded-[3px] border border-[var(--color-line)]" />
-            <p className="text-[12px] text-[var(--color-ink-soft)] mt-2">
-              Note: Image analysis uses demo detection. Real YOLO model integration coming soon.
-            </p>
+          <div className="section text-center">
+            {captureMode === 'camera' ? (
+              <div className="bg-black inline-block rounded border border-[var(--color-line)] overflow-hidden w-full max-w-[640px] aspect-video">
+                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              uploadedImage ? (
+                <img src={uploadedImage} alt="Uploaded meal" className="max-w-[640px] w-full max-h-[360px] object-cover rounded-[3px] border border-[var(--color-line)] inline-block" />
+              ) : (
+                <div className="py-12 text-[var(--color-ink-soft)]">Please select an image file to upload.</div>
+              )
+            )}
+            
+            <div className="mt-6">
+              <button onClick={runAnalysis} disabled={loading || (captureMode === 'upload' && !uploadedImage)} className="btn w-full max-w-sm h-12 text-base">
+                {loading ? 'Analyzing AI...' : 'Analyze Meal'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── Main scan panel ──────── */}
-      <div className="panel scan-layout">
-        {/* Left: plate tray */}
-        <div className="tray">
-          <div className="plate-wrap">
-            <svg viewBox="0 0 320 320" aria-hidden="true">
-              <circle cx="160" cy="160" r="150" fill="#F3F4EF" stroke="#D8DAD2" strokeWidth="1.5"/>
-              <path d="M 90 120 Q 60 170 95 220 Q 150 250 195 220 Q 175 150 140 115 Q 115 105 90 120 Z"
-                fill="var(--color-rice)" stroke="#DCD2A6" strokeWidth="1"/>
-              <ellipse cx="220" cy="120" rx="46" ry="34" fill="var(--color-veg)" opacity="0.85"/>
-              <ellipse cx="150" cy="230"
-                rx={40 + dalQty * 0.14} ry={26 + dalQty * 0.09}
-                fill="var(--color-dal)" opacity="0.9"
-                style={{ transition: 'all 0.3s ease' }}
-              />
-            </svg>
-            <div className="scan-line" aria-hidden="true" />
-            <div className="plate-label" style={{ top: '16%', left: '14%' }}>Rice <span className="g">~150 g</span></div>
-            <div className="plate-label" style={{ top: '12%', left: '62%' }}>Vegetable <span className="g">~60 g</span></div>
-            <div className="plate-label" style={{ top: '68%', left: '38%' }}>Dal <span className="g">~{dalQty} g</span></div>
-          </div>
-          <div className="text-[12px] text-[var(--color-ink-soft)]">Camera 2 · live segmentation overlay (illustrative)</div>
-        </div>
-
-        {/* Right: readout */}
-        <div>
-          <div className="section">
-            <h2 className="section-h">Student</h2>
-            <div className="student-row"><span>Age</span><span>{student?.age || 12}</span></div>
-            <div className="student-row"><span>Class</span><span>{student?.class_number || 7}</span></div>
-            <div className="student-row"><span>Age group</span><span>{student?.age_group || '11-14'}</span></div>
-          </div>
-
-          <div className="section">
-            <h2 className="section-h">Detected on plate</h2>
-            <table className="detect">
-              <tbody>
-                <tr><td><span className="swatch" style={{ background: 'var(--color-rice)' }} />Rice</td><td>~150 g</td></tr>
-                <tr><td><span className="swatch" style={{ background: 'var(--color-dal)' }} />Dal</td><td>~{dalQty} g</td></tr>
-                <tr><td><span className="swatch" style={{ background: 'var(--color-veg)' }} />Vegetable</td><td>~60 g</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="section">
-            <h2 className="section-h">MealGuard score</h2>
-            <div className="flex items-baseline gap-3.5 mb-3.5">
-              <span className="score-num" style={{ color: c.bar }}>{currentScore}</span>
-              <span className="score-den">/ 100</span>
-              <span className="status-pill ml-auto" style={{ background: c.bg, color: c.fg }}>
-                {labelFor(currentStatus)}
-              </span>
-            </div>
-            <div className="flex justify-between text-[12.5px] text-[var(--color-ink-soft)] mb-1">
-              <span>Protein coverage</span><span className="num">{currentCoverage}%</span>
-            </div>
-            <div className="meter-track">
-              <div className="meter-fill" style={{ width: `${currentCoverage}%`, background: c.bar, transition: 'width 0.35s ease, background 0.35s ease' }} />
-            </div>
-          </div>
-
-          <div className="section">
-            <h2 className="section-h">Why</h2>
-            <p className="text-[14.5px] leading-[1.55]">
-              Estimated protein <strong className="num">{currentProtein.toFixed(1)} g</strong> against a benchmark of{' '}
-              <strong className="num">18.0 g</strong> for age group 11–14 — coverage{' '}
-              <strong className="num">{currentCoverage}%</strong>. Main protein source is dal
-              (<span className="num">~{dalQty} g</span>). Rice and vegetable portions are within range;
-              the shortfall is the pulse component.
-            </p>
-          </div>
-
-          <div className="section">
-            <h2 className="section-h">What if — add dal</h2>
-            <div className="flex items-center gap-3.5 flex-wrap">
-              <input type="range" min={50} max={110} step={5} value={dalQty}
-                onChange={e => setDalQty(Number(e.target.value))}
-                className="flex-1 min-w-[120px]" />
-              <span className="num font-semibold min-w-[56px]">{dalQty} g</span>
-              <button className="btn" onClick={() => setDalQty(Math.min(110, dalQty + 30))}>Add 30 g dal</button>
-              <button className="btn btn-secondary" onClick={() => { setDalQty(50); oldScoreRef.current = { score: 68, status: 'review' }; }}>Reset</button>
-            </div>
-            <div className="flex items-center gap-2.5 mt-3.5 text-[14.5px] flex-wrap">
-              <span className="text-[var(--color-ink-soft)] line-through decoration-[var(--color-line)]">
-                {oldScoreRef.current.score} · {labelFor(oldScoreRef.current.status)}
-              </span>
-              <span className="text-[var(--color-ink-soft)]">→</span>
-              <span className="font-semibold" style={{ color: c.bar }}>
-                {currentScore} · {labelFor(currentStatus)}
-              </span>
-            </div>
-          </div>
-
-          <p className="footnote px-6 py-3.5">
-            Quantities are camera-based estimates, not exact measurements. Score reflects configured
-            nutritional and meal criteria, not an official government standard.
-          </p>
-        </div>
-      </div>
-
       {/* ── API result panel ──────── */}
       {result && (
-        <div className="panel mt-5 fade-in">
-          <div className="section">
-            <h2 className="section-h">Analysis result — {result.status}</h2>
-            <div className="flex items-baseline gap-3 mb-3">
-              <span className="score-num" style={{ color: result.status === 'PASS' ? '#4C7A4A' : result.status === 'REVIEW' ? '#C9922E' : '#A03B2A' }}>
-                {Math.round(result.score)}
-              </span>
-              <span className="score-den">/ 100</span>
-              <span className={`pill pill-${result.status.toLowerCase()} ml-auto`}>
-                {result.status === 'PASS' ? 'Pass' : result.status === 'REVIEW' ? 'Review' : 'Fail'}
-              </span>
-            </div>
-
-            <h2 className="section-h mt-4">Detected foods</h2>
-            <table className="detect mb-4">
-              <tbody>
-                {result.detection.detections.map((d, i) => (
-                  <tr key={i}>
-                    <td>
-                      <span className="swatch" style={{ background: foodColor(d.food) }} />
-                      <span className="capitalize">{d.food}</span>
-                    </td>
-                    <td>~{result.quantities[d.food]} g · {(d.confidence * 100).toFixed(0)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <h2 className="section-h">Nutrient coverage</h2>
-            {Object.entries(result.coverage).map(([key, cov]) => {
-              const barColor = cov.adequate ? 'var(--color-veg)' : cov.coverage_pct >= 50 ? 'var(--color-dal)' : 'var(--color-fail)';
-              return (
-                <div key={key} className="mb-2.5">
-                  <div className="flex justify-between text-[12.5px] text-[var(--color-ink-soft)] mb-1">
-                    <span className="capitalize">{key.replace(/_/g, ' ')}</span>
-                    <span className="num">{cov.coverage_pct.toFixed(0)}%</span>
-                  </div>
-                  <div className="meter-track"><div className="meter-fill" style={{ width: `${Math.min(cov.coverage_pct, 100)}%`, background: barColor }} /></div>
-                </div>
-              );
-            })}
-          </div>
-
-          {result.recommendations.length > 0 && (
+        <div className="panel mt-5 fade-in scan-layout">
+          <div>
             <div className="section">
-              <h2 className="section-h">Recommendations</h2>
-              {result.recommendations.map((rec, i) => (
-                <div key={i} className="rec-card">
-                  <div className="text-[11.5px] font-semibold text-[var(--color-dal)] mb-1">{rec.problem}</div>
-                  <div className="text-[13.5px] text-[var(--color-ink-soft)]">{rec.suggestion}</div>
-                </div>
-              ))}
+              <h2 className="section-h">Analysis result — {result.status}</h2>
+              <div className="flex items-baseline gap-3 mb-3">
+                <span className="score-num" style={{ color: result.status === 'PASS' ? '#4C7A4A' : result.status === 'REVIEW' ? '#C9922E' : '#A03B2A' }}>
+                  {Math.round(result.score)}
+                </span>
+                <span className="score-den">/ 100</span>
+                <span className={`pill pill-${result.status.toLowerCase()} ml-auto`}>
+                  {result.status === 'PASS' ? 'Pass' : result.status === 'REVIEW' ? 'Review' : 'Fail'}
+                </span>
+              </div>
             </div>
-          )}
+
+            <div className="section">
+              <h2 className="section-h">Subject</h2>
+              <div className="student-row"><span>ID / Mode</span><span>{idMode === 'student_id' ? result.student.id : 'Age-based (Anon)'}</span></div>
+              <div className="student-row"><span>Age</span><span>{displayAge}</span></div>
+              <div className="student-row"><span>Age group</span><span>{displayAgeGroup}</span></div>
+            </div>
+
+            <div className="section">
+              <h2 className="section-h">Nutrient coverage</h2>
+              {Object.entries(result.coverage).map(([key, cov]) => {
+                const barColor = cov.adequate ? 'var(--color-veg)' : cov.coverage_pct >= 50 ? 'var(--color-dal)' : 'var(--color-fail)';
+                return (
+                  <div key={key} className="mb-2.5">
+                    <div className="flex justify-between text-[12.5px] text-[var(--color-ink-soft)] mb-1">
+                      <span className="capitalize">{key.replace(/_/g, ' ')}</span>
+                      <span className="num">{cov.coverage_pct.toFixed(0)}%</span>
+                    </div>
+                    <div className="meter-track"><div className="meter-fill" style={{ width: `${Math.min(cov.coverage_pct, 100)}%`, background: barColor }} /></div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {result.recommendations.length > 0 && (
+              <div className="section">
+                <h2 className="section-h">Recommendations</h2>
+                {result.recommendations.map((rec, i) => (
+                  <div key={i} className="rec-card mb-3">
+                    <div className="text-[11.5px] font-semibold text-[var(--color-dal)] mb-1">{rec.problem}</div>
+                    <div className="text-[13.5px] text-[var(--color-ink-soft)]">{rec.suggestion}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <div className="section h-full flex flex-col">
+              <h2 className="section-h">Detected plate</h2>
+              <div className="tray flex-1 flex flex-col items-center justify-center p-6 border rounded mb-4">
+                <div className="plate-wrap relative">
+                  <svg viewBox="0 0 320 320" aria-hidden="true">
+                    <circle cx="160" cy="160" r="150" fill="#F3F4EF" stroke="#D8DAD2" strokeWidth="1.5"/>
+                    <path d="M 90 120 Q 60 170 95 220 Q 150 250 195 220 Q 175 150 140 115 Q 115 105 90 120 Z" fill="var(--color-rice)" stroke="#DCD2A6" strokeWidth="1"/>
+                    <ellipse cx="220" cy="120" rx="46" ry="34" fill="var(--color-veg)" opacity="0.85"/>
+                    <ellipse cx="150" cy="230" rx={40 + dalQty * 0.14} ry={26 + dalQty * 0.09} fill="var(--color-dal)" opacity="0.9" style={{ transition: 'all 0.3s ease' }} />
+                  </svg>
+                  <div className="plate-label" style={{ top: '16%', left: '14%' }}>Rice <span className="g">~{result.quantities['rice'] || 0} g</span></div>
+                  <div className="plate-label" style={{ top: '12%', left: '62%' }}>Veg <span className="g">~{result.quantities['vegetable'] || 0} g</span></div>
+                  <div className="plate-label" style={{ top: '68%', left: '38%' }}>Dal <span className="g">~{dalQty} g</span></div>
+                </div>
+              </div>
+              
+              <h2 className="section-h mt-4">What if — adjust dal quantity</h2>
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <input type="range" min={20} max={150} step={5} value={dalQty}
+                  onChange={e => setDalQty(Number(e.target.value))}
+                  className="flex-1 min-w-[120px]" />
+                <span className="num font-semibold min-w-[56px]">{dalQty} g</span>
+                <button className="btn btn-secondary" onClick={() => setDalQty(result.quantities['dal'] || 50)}>Reset</button>
+              </div>
+              <p className="text-[12px] text-[var(--color-ink-soft)] mt-2 leading-relaxed">
+                Move the slider to simulate adding or removing dal. Notice how the visual size changes instantly.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

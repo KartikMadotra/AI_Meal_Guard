@@ -30,6 +30,7 @@ class AnalyzeRequest(BaseModel):
     age: Optional[int] = None              # Mode B: Age only
     meal_type: str = "lunch"
     plate_profile: Optional[str] = None    # For demo: select a preset plate
+    image_data: Optional[str] = None       # Base64 image data for live Gemini analysis
 
 class WhatIfRequest(BaseModel):
     """Input for What-If simulator."""
@@ -70,8 +71,11 @@ async def analyze_meal(
     else:
         raise HTTPException(400, "Provide either 'student_id' or 'age'.")
 
-    # ── Step 2: Detect foods (mock) ──────────────────────────────
-    detection_result = detect(plate_profile=req.plate_profile)
+    # ── Step 2: Detect foods (Gemini/Mock) ──────────────────────────────
+    detection_result = detect(
+        plate_profile=req.plate_profile,
+        image_data=req.image_data
+    )
 
     # ── Step 3: Estimate quantities ──────────────────────────────
     quantities = estimate_quantities(
