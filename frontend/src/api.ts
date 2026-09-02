@@ -36,6 +36,21 @@ export async function getAgeGroup(age: number) {
   );
 }
 
+export async function createStudent(params: {
+  name: string;
+  class_number: number;
+  age: number;
+}): Promise<{ student: Student; message: string }> {
+  return fetchJSON(`${BASE}/students/`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+export async function deleteStudent(id: string): Promise<{ message: string }> {
+  return fetchJSON(`${BASE}/students/${id}`, { method: 'DELETE' });
+}
+
 // ── Analysis ──────────────────────────────────────────
 export async function analyzeMeal(params: {
   student_id?: string;

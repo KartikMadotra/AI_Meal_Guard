@@ -2,19 +2,23 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Python dependencies
+# System deps for OpenCV
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python deps (split for caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend
+# Copy application
 COPY backend/ backend/
 COPY data/ data/
 
-# Create uploads directory
+# Create dirs
 RUN mkdir -p uploads
 
-# Expose port
 EXPOSE 8000
 
-# Seed database and start server
+# Seed DB then start server
 CMD ["sh", "-c", "python -m backend.seed && uvicorn backend.main:app --host 0.0.0.0 --port 8000"]
