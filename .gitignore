@@ -49,3 +49,5 @@ frontend/dist/
 
 # ── Uploads ──
 uploads/
+
+backend/ai/

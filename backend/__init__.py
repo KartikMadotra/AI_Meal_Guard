@@ -1,3 +1,0 @@
-"""
-AI MealGuard — Backend Package.
-"""
