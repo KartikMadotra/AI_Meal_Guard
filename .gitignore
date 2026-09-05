@@ -26,9 +26,10 @@ desktop.ini
 # ── Environment ──
 .env
 
-# ── Database ──
+# ── Database & Data ──
 *.db
 !data/*.db
+data/*.csv
 
 # ── AI Models ──
 backend/models/*.pt

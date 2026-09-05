@@ -7,15 +7,15 @@ from typing import Dict, Any, List
 
 # ── 1. Reference Data (Age Groups & Requirements) ──
 AGE_GROUPS = {
-    "6-8":  {"calories": 450, "protein": 12.0, "carbs": 60.0},
-    "9-10": {"calories": 550, "protein": 16.0, "carbs": 70.0},
-    "11-14": {"calories": 700, "protein": 20.0, "carbs": 90.0},
-    "15-18": {"calories": 800, "protein": 25.0, "carbs": 105.0},
+    "5-7":  {"calories": 400, "protein": 12.0, "carbs": 60.0},
+    "8-10": {"calories": 500, "protein": 15.0, "carbs": 75.0},
+    "11-14": {"calories": 650, "protein": 20.0, "carbs": 90.0},
+    "15-18": {"calories": 800, "protein": 25.0, "carbs": 110.0},
 }
 
 def get_age_group(age: int) -> str:
-    if age <= 8: return "6-8"
-    if age <= 10: return "9-10"
+    if age <= 7: return "5-7"
+    if age <= 10: return "8-10"
     if age <= 14: return "11-14"
     return "15-18"
 
@@ -67,7 +67,7 @@ def get_density_factor(food_name: str) -> float:
     return DENSITY_FACTORS.get(food_type, 1.0)
 
 
-# ── 5. Scoring Logic ──
+# ── 5. Scoring Logic (Cinematic Blueprint) ──
 def score_meal(quantities: Dict[str, float], age: int) -> Dict[str, Any]:
     """Calculate total nutrition and SDG-2 score."""
     age_group_str = get_age_group(age)
@@ -92,35 +92,47 @@ def score_meal(quantities: Dict[str, float], age: int) -> Dict[str, Any]:
     
     # Simple overall score average
     overall_score = (coverage["calories"] + coverage["protein"] + coverage["carbs"]) / 3.0
+    overall_score = round(overall_score, 1)
     
-    # Status
-    if overall_score >= 90:
-        status = "Excellent"
-        explanation = "The meal perfectly meets the requirements for this age group."
-    elif overall_score >= 70:
-        status = "Good"
-        explanation = "The meal is nutritious but could use slightly larger portions."
-    elif overall_score >= 50:
-        status = "Adequate"
-        explanation = "The meal meets basic needs but falls short in some key areas."
+    # Status (PASS/REVIEW/FAIL)
+    if overall_score >= 80:
+        status = "PASS"
+    elif overall_score >= 60:
+        status = "REVIEW"
     else:
-        status = "Inadequate"
-        explanation = "The meal is significantly deficient for this age group's needs."
+        status = "FAIL"
         
-    # Recommendations
+    # Explanation (The "WHY?")
+    issues = []
     recommendations = []
+    
     if coverage["protein"] < 80:
-        recommendations.append("Increase protein by adding more dal or curd.")
-    if coverage["calories"] < 80:
-        recommendations.append("Increase overall portion sizes (rice or roti).")
-    if not any(get_nutrition_per_100g(f)["type"] == "fruit" for f in quantities):
-        recommendations.append("Add a serving of fruit for micronutrients.")
+        issues.append(f"Protein is below target ({round(totals['protein'], 1)}g vs {reqs['protein']}g).")
+        recommendations.append("Increase pulse/protein component (e.g., add dal).")
         
-    if not recommendations:
-        recommendations = ["Keep up the great work!"]
+    if coverage["calories"] < 80:
+        issues.append(f"Energy is below target ({round(totals['calories'], 0)}kcal vs {reqs['calories']}kcal).")
+        recommendations.append("Increase main carbohydrate portion (e.g., rice or roti).")
+        
+    has_veg = any(get_nutrition_per_100g(f)["type"] == "veg" for f in quantities)
+    if not has_veg:
+        issues.append("Missing vegetable component.")
+        recommendations.append("Add 1 serving of vegetables.")
+        
+    has_fruit = any(get_nutrition_per_100g(f)["type"] == "fruit" for f in quantities)
+    if not has_fruit:
+        issues.append("Missing fruit component.")
+        recommendations.append("Add 1 serving of seasonal fruit.")
+        
+    if not issues:
+        issues.append("Meal meets all nutritional targets for this age group.")
+        recommendations.append("Keep up the great work! No changes needed.")
+
+    # Convert to single string for DB compatibility, or return as list
+    explanation = "\\n".join(issues)
 
     return {
-        "score": round(overall_score, 1),
+        "score": overall_score,
         "status": status,
         "nutrition": totals,
         "coverage": coverage,

@@ -36,8 +36,8 @@ CORRECT_NAMES = [
 UNSCRAMBLE = dict(zip(WRONG_NAMES, CORRECT_NAMES))
 
 # ── 3. Reference Scale for Weight ──
-# Grams per 1000 pixels
-BASE_PIXELS_TO_GRAMS = 25.0 / 1000.0  # 25g per 1000 pixels at reference depth
+# Max theoretical weight if the entire image was filled with density 1.0 food
+MAX_IMAGE_WEIGHT_G = 1500.0
 
 def analyze_image(image_path: str):
     """Run YOLO inference and extract precise masks and weights."""
@@ -69,15 +69,17 @@ def analyze_image(image_path: str):
             # Get the exact bounding box
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             
-            # ── Pixel-Area-based Weight Estimation ──
+            # ── Area-Fraction-based Weight Estimation ──
             # Calculate total non-zero pixels in the mask for this object
-            pixel_area = mask.sum() 
+            pixel_area = float(mask.sum())
+            total_pixels = float(mask.shape[0] * mask.shape[1])
+            area_fraction = pixel_area / total_pixels
             
             # Lookup density factor (rice is denser than papad)
             density = get_density_factor(true_food_name)
             
             # Calculate weight
-            estimated_weight_grams = round(pixel_area * BASE_PIXELS_TO_GRAMS * density, 1)
+            estimated_weight_grams = float(round(area_fraction * MAX_IMAGE_WEIGHT_G * density, 1))
 
             detections.append({
                 "food": true_food_name,

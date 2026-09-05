@@ -16,7 +16,7 @@ if %ERRORLEVEL% neq 0 (
 
 echo [2/2] Starting FastAPI Backend...
 echo.
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8080 --reload
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Failed to start the backend.
     pause

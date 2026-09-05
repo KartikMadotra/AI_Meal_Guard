@@ -1,245 +1,1025 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI MealGuard - Simple Tester</title>
+    <title>AI MealGuard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- GSAP -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        bgbase: '#0B0D10',
+                        surface: '#11151A',
+                        bordercolor: '#242A31',
+                        pass: '#22C55E',
+                        review: '#F59E0B',
+                        fail: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover { background-color: #2980b9; }
-        .image-container {
-            position: relative;
-            display: inline-block;
-            margin-top: 10px;
-            max-width: 100%;
-        }
-        img {
-            max-width: 100%;
-            border-radius: 4px;
-            display: block;
-        }
-        canvas {
+        body { background-color: theme('colors.bgbase'); color: #fff; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        /* Scanner Line Animation */
+        .scanner-line {
             position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: #58a6ff;
+            box-shadow: 0 0 10px #58a6ff, 0 0 20px #58a6ff;
+            opacity: 0;
         }
-        pre {
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 15px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-        .status {
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status.Excellent { background-color: #2ecc71; color: white; }
-        .status.Good { background-color: #f1c40f; color: black; }
-        .status.Adequate { background-color: #e67e22; color: white; }
-        .status.Inadequate { background-color: #e74c3c; color: white; }
+
+        /* Number Font */
+        .tech-number { font-family: 'JetBrains Mono', monospace; }
+
+        /* SVG Score Ring */
+        .score-ring { transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .score-ring-circle { transition: stroke-dashoffset 1s ease-out; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center p-4 antialiased selection:bg-blue-500/30">
 
-    <h1>🥗 AI MealGuard (V2) Tester</h1>
+<!-- Navigation -->
+<nav class="w-full max-w-4xl flex justify-between items-center mb-8 pb-4 border-b border-bordercolor">
+    <div class="flex items-center gap-2">
+        <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
+        <h1 class="text-lg font-bold tracking-widest text-white">AI MEALGUARD</h1>
+    </div>
+    <div class="flex items-center gap-6 text-sm font-medium text-gray-400">
+        <button onclick="nav('screen-scan')" class="hover:text-white transition-colors">Scan Meal</button>
+        <button onclick="nav('screen-history')" class="hover:text-white transition-colors">History</button>
+        <button onclick="nav('screen-dashboard')" class="hover:text-white transition-colors">Dashboard</button>
+        <div class="flex items-center gap-2 text-pass cursor-pointer hover:text-white transition-colors" id="nav-student-indicator" style="display:none;" onclick="nav('screen-home')" title="Change Student">
+            <span class="w-2 h-2 rounded-full bg-pass"></span>
+            <span id="nav-student-id">STU-1024</span>
+        </div>
+    </div>
+</nav>
 
-    <div class="card">
-        <h3>1. Upload Meal Image</h3>
-        <input type="file" id="imageInput" accept="image/*">
-        <br><br>
-        <div class="image-container" id="imageContainer" style="display:none;">
-            <img id="preview" />
-            <canvas id="overlay"></canvas>
+<!-- MAIN CONTAINER -->
+<div class="w-full max-w-4xl relative">
+    
+    <!-- 0. HOME / STUDENT ID SCREEN -->
+    <div id="screen-home" class="screen active">
+        <div class="bg-surface border border-bordercolor rounded-2xl p-10 shadow-2xl max-w-lg mx-auto text-center mt-10 relative overflow-hidden">
+            
+            <div class="flex justify-center gap-4 mb-8">
+                <button id="btn-tab-scan" onclick="switchHomeTab('scan')" class="text-sm font-bold uppercase tracking-wider text-white border-b-2 border-pass pb-1 transition-colors">Scan Meal</button>
+                <button id="btn-tab-reg" onclick="switchHomeTab('reg')" class="text-sm font-bold uppercase tracking-wider text-gray-500 border-b-2 border-transparent pb-1 hover:text-gray-300 transition-colors">Register Student</button>
+            </div>
+
+            <!-- SCAN TAB -->
+            <div id="home-tab-scan">
+                <div class="w-16 h-16 bg-bgbase border border-bordercolor rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <h2 class="text-xl font-semibold mb-2">WHO IS BEING ANALYZED?</h2>
+                <p class="text-sm text-gray-500 mb-8">Enter Student ID or Age to begin.</p>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Student ID</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="homeStudentId" placeholder="e.g. STU-1024" class="w-full bg-bgbase border border-bordercolor rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white transition-colors">
+                            <button onclick="startFaceScan()" class="bg-surface border border-bordercolor px-4 rounded-lg hover:bg-gray-800 transition-colors" title="Scan Face">
+                                <i data-lucide="scan-face" class="w-5 h-5 text-pass"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center text-xs text-gray-600 font-bold uppercase my-2">OR</div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Age Only (Guest)</label>
+                        <input type="number" id="homeAge" value="12" class="w-full bg-bgbase border border-bordercolor rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white transition-colors">
+                    </div>
+                </div>
+
+                <button onclick="proceedToScan()" class="w-full mt-8 bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors flex justify-center items-center gap-2">
+                    CONTINUE TO SCAN <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- REGISTER TAB -->
+            <div id="home-tab-reg" style="display: none;">
+                <div class="w-16 h-16 bg-bgbase border border-bordercolor rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="user-plus" class="w-8 h-8 text-blue-400"></i>
+                </div>
+                <h2 class="text-xl font-semibold mb-2">REGISTER STUDENT</h2>
+                <p class="text-sm text-gray-500 mb-8">Add a new student to the database.</p>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
+                        <input type="text" id="regName" placeholder="e.g. Rahul Sharma" class="w-full bg-bgbase border border-bordercolor rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Age</label>
+                        <input type="number" id="regAge" placeholder="12" class="w-full bg-bgbase border border-bordercolor rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white transition-colors">
+                    </div>
+                    <div>
+                        <button id="btnRegFace" onclick="captureRegistrationFace()" class="w-full bg-surface border border-bordercolor rounded-lg px-4 py-3 text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="camera" class="w-4 h-4"></i> Add Facial Recognition (Optional)
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="registerStudent()" class="w-full mt-8 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-500 transition-colors flex justify-center items-center gap-2">
+                    REGISTER NOW <i data-lucide="check" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 1. SCAN SCREEN -->
+    <div id="screen-scan" class="screen">
+        <div class="bg-surface border border-bordercolor rounded-2xl p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i data-lucide="camera" class="w-5 h-5 text-gray-400"></i> MEAL SCAN
+                </h2>
+                <div class="text-sm font-mono text-gray-500">READY</div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Inputs -->
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Upload Plate Image</label>
+                        <input type="file" id="inputFile" accept="image/*" class="w-full bg-bgbase border border-bordercolor rounded-lg px-4 py-2.5 text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-surface file:text-white hover:file:bg-bordercolor transition-colors">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 py-2">
+                    <div class="flex-1 h-px bg-bordercolor"></div>
+                    <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">OR</span>
+                    <div class="flex-1 h-px bg-bordercolor"></div>
+                </div>
+
+                <button onclick="captureMealPhoto()" class="w-full bg-surface border border-bordercolor text-gray-300 font-semibold py-4 rounded-xl hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                    <i data-lucide="camera" class="w-5 h-5"></i> USE WEBCAM
+                </button>
+
+                <!-- Live Camera Placeholder -->
+                <div id="camera-placeholder" class="w-full h-64 bg-bgbase border border-bordercolor rounded-xl flex flex-col items-center justify-center text-gray-500 gap-3 overflow-hidden">
+                    <i data-lucide="image" class="w-10 h-10 opacity-50"></i>
+                    <span class="text-sm">Awaiting Image</span>
+                </div>
+
+                <!-- Status -->
+                <div class="flex gap-4 text-sm text-gray-400">
+                    <div class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-pass"></i> System Ready</div>
+                    <div class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-pass"></i> Connection OK</div>
+                </div>
+
+                <button onclick="startAnalysis()" class="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-gray-200 transition-colors flex justify-center items-center gap-2">
+                    <i data-lucide="aperture" class="w-5 h-5"></i> CAPTURE & ANALYZE
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <h3>2. Analyze</h3>
-        <label>Student Age:</label>
-        <input type="number" id="ageInput" value="10" min="6" max="18">
-        <button id="analyzeBtn">Analyze Meal</button>
-        <p id="loading" style="display:none;">⏳ Analyzing with AI...</p>
+    <!-- 2. ANALYSIS SCREEN -->
+    <div id="screen-analysis" class="screen">
+        <div class="bg-surface border border-bordercolor rounded-2xl p-8 shadow-2xl">
+            <h2 class="text-xl font-semibold flex items-center gap-2 mb-6">
+                <i data-lucide="cpu" class="w-5 h-5 text-blue-400"></i> AI ANALYSIS
+            </h2>
+
+            <!-- Image Container -->
+            <div id="analysis-image-wrapper">
+                <div id="mainImageContainer" class="w-full flex justify-center items-center overflow-hidden" style="max-height: 500px;">
+                    <div class="relative inline-block max-w-full max-h-[500px]">
+                        <img id="mealImage" class="max-h-[500px] max-w-full w-auto h-auto opacity-75 block rounded-xl border border-bordercolor shadow-lg">
+                        <canvas id="overlayCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none rounded-xl"></canvas>
+                        <div id="scannerLine" class="scanner-line rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Indicators -->
+            <div class="mt-8 grid grid-cols-2 gap-4 text-sm font-mono text-gray-400" id="ai-steps">
+                <div id="step-1" class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4"></i> Plate detected</div>
+                <div id="step-2" class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4"></i> Food regions isolated</div>
+                <div id="step-3" class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4"></i> Segmentation complete</div>
+                <div id="step-4" class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4"></i> Calculating nutrition</div>
+            </div>
+        </div>
     </div>
 
-    <div class="card" id="results" style="display:none;">
-        <h3>3. Results</h3>
-        
-        <h4>Nutrition Score</h4>
-        <p>Score: <span id="scoreVal"></span>/100</p>
-        <p>Status: <span id="statusVal" class="status"></span></p>
-        <p><em id="explanationVal"></em></p>
-        
-        <h4>Detected Foods & Estimated Quantities</h4>
-        <ul id="foodsList"></ul>
+    <!-- 3. RESULT SCREEN -->
+    <div id="screen-result" class="screen">
+        <div class="grid grid-cols-3 gap-6">
+            
+            <!-- Left: Detections & Nutrition -->
+            <div class="col-span-2 space-y-6">
+                <!-- Image Placeholder -->
+                <div id="res-image-placeholder"></div>
 
-        <h4>Recommendations</h4>
-        <ul id="recommendationsList"></ul>
+                <!-- Detections -->
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-bordercolor pb-2">Detected Components</h3>
+                    <div id="res-foods" class="space-y-3 font-mono text-sm">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
 
-        <h4>Raw JSON Data</h4>
-        <pre id="rawJson"></pre>
+                <!-- Nutrition -->
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-bordercolor pb-2">Estimated Nutrition</h3>
+                    <div class="grid grid-cols-3 gap-4 font-mono text-sm">
+                        <div><div class="text-gray-500 mb-1">Energy</div><div class="text-white text-lg"><span id="res-cal" class="count-up tech-number">0</span> kcal</div></div>
+                        <div><div class="text-gray-500 mb-1">Protein</div><div class="text-white text-lg"><span id="res-pro" class="count-up tech-number">0</span> g</div></div>
+                        <div><div class="text-gray-500 mb-1">Carbs</div><div class="text-white text-lg"><span id="res-carb" class="count-up tech-number">0</span> g</div></div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="saveMeal()" class="flex-1 bg-surface border border-bordercolor text-white font-medium py-3 rounded-xl hover:bg-bordercolor transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i> Save to History
+                    </button>
+                    <button onclick="nav('screen-scan')" class="flex-1 bg-white text-black font-medium py-3 rounded-xl hover:bg-gray-200 transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> New Scan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Score & Why -->
+            <div class="col-span-1 space-y-6">
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 flex flex-col items-center text-center">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Meal Score</h3>
+                    
+                    <!-- SVG Score Ring -->
+                    <div class="relative w-32 h-32 mb-4">
+                        <svg class="w-full h-full score-ring" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#242A31" stroke-width="8" />
+                            <circle id="scoreRing" cx="50" cy="50" r="45" fill="none" stroke="#22C55E" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" class="score-ring-circle" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-3xl font-bold tech-number"><span id="res-score" class="count-up" data-val="0">0</span></div>
+                            <div class="text-xs text-gray-500">/100</div>
+                        </div>
+                    </div>
+
+                    <div id="res-status" class="text-lg font-bold tracking-widest uppercase text-pass mb-6">PASS</div>
+                    
+                    <button onclick="showWhy()" class="w-full bg-bgbase border border-bordercolor text-gray-300 text-sm font-medium py-2 rounded-lg hover:text-white transition-colors">
+                        WHY THIS SCORE?
+                    </button>
+                </div>
+                
+                <!-- Recommendations -->
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-bordercolor pb-2">Recommendations</h3>
+                    <div id="res-rec" class="space-y-3 text-sm text-gray-300 leading-relaxed">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- 4. HISTORY SCREEN -->
+    <div id="screen-history" class="screen">
+        <div class="bg-surface border border-bordercolor rounded-2xl p-8 shadow-2xl">
+            <h2 class="text-xl font-semibold flex items-center gap-2 mb-6 border-b border-bordercolor pb-4">
+                <i data-lucide="history" class="w-5 h-5 text-blue-400"></i> WEEKLY HISTORY
+            </h2>
+            <div id="history-container" class="space-y-4">
+                <!-- Populated by JS -->
+                <p class="text-gray-500 text-center py-10">Loading history...</p>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const preview = document.getElementById('preview');
-        const imageContainer = document.getElementById('imageContainer');
-        const overlay = document.getElementById('overlay');
-        const ctx = overlay.getContext('2d');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const loading = document.getElementById('loading');
-        const results = document.getElementById('results');
+    <!-- 5. DASHBOARD SCREEN -->
+    <div id="screen-dashboard" class="screen">
+        <div class="grid grid-cols-3 gap-6">
+            <div class="col-span-1 space-y-6">
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 text-center shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Total Meals Analyzed</h3>
+                    <div class="text-5xl font-bold tech-number text-white" id="dash-total">0</div>
+                </div>
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 text-center shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Average Score</h3>
+                    <div class="text-5xl font-bold tech-number text-white" id="dash-avg">0</div>
+                </div>
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 text-center shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Pass Rate</h3>
+                    <div class="text-5xl font-bold tech-number text-pass" id="dash-pass">0%</div>
+                </div>
+            </div>
+            
+            <div class="col-span-2 space-y-6">
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-bordercolor pb-2">Common Issues</h3>
+                    <div class="space-y-4 mt-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1 text-gray-400"><span>Protein Missing</span> <span id="dash-pro-pct">0%</span></div>
+                            <div class="w-full bg-bgbase rounded-full h-2.5"><div class="bg-warning h-2.5 rounded-full" id="dash-pro-bar" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1 text-gray-400"><span>Fruit Missing</span> <span id="dash-fruit-pct">0%</span></div>
+                            <div class="w-full bg-bgbase rounded-full h-2.5"><div class="bg-fail h-2.5 rounded-full" id="dash-fruit-bar" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-surface border border-bordercolor rounded-2xl p-6 shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b border-bordercolor pb-2">Top Foods Detected</h3>
+                    <div id="dash-top-foods" class="space-y-3 mt-4 text-sm font-mono text-gray-300">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        let base64Image = null;
+</div>
 
-        // Preview image and convert to Base64
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    base64Image = event.target.result;
-                    preview.src = base64Image;
-                    preview.onload = () => {
-                        imageContainer.style.display = 'inline-block';
-                        // Clear canvas on new image upload
-                        ctx.clearRect(0, 0, overlay.width, overlay.height);
-                    };
-                };
-                reader.readAsDataURL(file);
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+    
+    let globalResult = null;
+    let currentImage = null;
+
+    function nav(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        
+        // Move image container back to analysis screen if leaving result screen
+        if (screenId !== 'screen-result' && screenId !== 'screen-analysis') {
+            const imgContainer = document.getElementById('mainImageContainer');
+            if (imgContainer && document.getElementById('analysis-image-wrapper')) {
+                document.getElementById('analysis-image-wrapper').appendChild(imgContainer);
+            }
+        }
+        
+        // Smart Navigation: If trying to go to scan but no student is set, force home
+        if (screenId === 'screen-scan' && !hasEnteredStudent) {
+            screenId = 'screen-home';
+        }
+
+        // Fetch data if needed
+        if (screenId === 'screen-history') fetchHistory();
+        if (screenId === 'screen-dashboard') fetchDashboard();
+
+        // GSAP Fade In
+        const screen = document.getElementById(screenId);
+        screen.classList.add('active');
+        gsap.fromTo(screen, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
+    }
+
+    let currentStudentAge = 12;
+    let hasEnteredStudent = false;
+    let registrationFaceBase64 = null;
+
+    function switchHomeTab(tab) {
+        if (tab === 'scan') {
+            document.getElementById('home-tab-scan').style.display = 'block';
+            document.getElementById('home-tab-reg').style.display = 'none';
+            document.getElementById('btn-tab-scan').className = "text-sm font-bold uppercase tracking-wider text-white border-b-2 border-pass pb-1 transition-colors";
+            document.getElementById('btn-tab-reg').className = "text-sm font-bold uppercase tracking-wider text-gray-500 border-b-2 border-transparent pb-1 hover:text-gray-300 transition-colors";
+        } else {
+            document.getElementById('home-tab-scan').style.display = 'none';
+            document.getElementById('home-tab-reg').style.display = 'block';
+            document.getElementById('btn-tab-reg').className = "text-sm font-bold uppercase tracking-wider text-white border-b-2 border-blue-500 pb-1 transition-colors";
+            document.getElementById('btn-tab-scan').className = "text-sm font-bold uppercase tracking-wider text-gray-500 border-b-2 border-transparent pb-1 hover:text-gray-300 transition-colors";
+            // Reset reg face
+            registrationFaceBase64 = null;
+            document.getElementById('btnRegFace').innerHTML = '<i data-lucide="camera" class="w-4 h-4"></i> Add Facial Recognition (Optional)';
+            lucide.createIcons();
+        }
+    }
+
+    async function captureRegistrationFace() {
+        let stream = null;
+        let pollInterval = null;
+        
+        Swal.fire({
+            title: 'Auto-Capturing Face',
+            html: '<video id="regVideo" width="320" height="240" autoplay playsinline muted style="border-radius:10px; margin:auto; transform: scaleX(-1);"></video><canvas id="regCanvas" style="display:none;"></canvas><div id="regStatus" class="mt-4 text-sm text-gray-400 font-mono flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Please look at the camera...</div>',
+            showConfirmButton: true,
+            confirmButtonText: 'Force Capture',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            background: '#11151A', color: '#fff',
+            didOpen: async () => {
+                lucide.createIcons();
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    const vid = document.getElementById('regVideo');
+                    vid.srcObject = stream;
+                    vid.play().catch(e => console.warn(e));
+                    
+                    // Start auto-capture polling
+                    let isChecking = false;
+                    pollInterval = setInterval(async () => {
+                        if (isChecking || !vid || vid.videoWidth === 0) return;
+                        isChecking = true;
+                        
+                        const canvas = document.getElementById('regCanvas');
+                        const scale = Math.min(1.0, 640 / vid.videoWidth);
+                        canvas.width = vid.videoWidth * scale;
+                        canvas.height = vid.videoHeight * scale;
+                        canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+                        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        try {
+                            const res = await fetch('/api/students/check_face', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ face_image: b64 })
+                            });
+                            const data = await res.json();
+                            if (data.face_detected) {
+                                clearInterval(pollInterval);
+                                registrationFaceBase64 = b64;
+                                Swal.close();
+                                document.getElementById('btnRegFace').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> Face Captured Successfully';
+                                document.getElementById('btnRegFace').classList.add('border-green-500', 'text-white');
+                                lucide.createIcons();
+                            }
+                        } catch (err) {}
+                        isChecking = false;
+                    }, 1000);
+                    
+                } catch(e) {
+                    Swal.showValidationMessage('Webcam access denied or unavailable.');
+                }
+            },
+            willClose: () => {
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                if (pollInterval) clearInterval(pollInterval);
+            },
+            preConfirm: () => {
+                const video = document.getElementById('regVideo');
+                const canvas = document.getElementById('regCanvas');
+                const scale = Math.min(1.0, 640 / video.videoWidth);
+                canvas.width = video.videoWidth * scale;
+                canvas.height = video.videoHeight * scale;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                return canvas.toDataURL('image/jpeg', 0.8);
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                registrationFaceBase64 = result.value;
+                document.getElementById('btnRegFace').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> Face Captured';
+                document.getElementById('btnRegFace').classList.add('border-green-500', 'text-white');
+                lucide.createIcons();
             }
         });
+    }
 
-        // Send to backend
-        analyzeBtn.addEventListener('click', async () => {
-            if (!base64Image) {
-                alert("Please select an image first!");
-                return;
+    async function startFaceScan() {
+        let stream = null;
+        let pollInterval = null;
+        
+        Swal.fire({
+            title: 'Face Login (Auto-Scan)',
+            html: '<video id="loginVideo" width="320" height="240" autoplay playsinline muted style="border-radius:10px; margin:auto; transform: scaleX(-1);"></video><canvas id="loginCanvas" style="display:none;"></canvas><div id="loginStatus" class="mt-4 text-sm text-gray-400 font-mono flex items-center justify-center gap-2"><i data-lucide="scan-line" class="w-4 h-4 animate-pulse"></i> Scanning for matches...</div>',
+            showConfirmButton: true,
+            confirmButtonText: 'Force Scan',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            background: '#11151A', color: '#fff',
+            didOpen: async () => {
+                lucide.createIcons();
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    const vid = document.getElementById('loginVideo');
+                    vid.srcObject = stream;
+                    vid.play().catch(e => console.warn(e));
+                    
+                    // Start auto-scan polling
+                    let isScanning = false;
+                    pollInterval = setInterval(async () => {
+                        if (isScanning || !vid || vid.videoWidth === 0) return;
+                        isScanning = true;
+                        
+                        const canvas = document.getElementById('loginCanvas');
+                        const scale = Math.min(1.0, 640 / vid.videoWidth);
+                        canvas.width = vid.videoWidth * scale;
+                        canvas.height = vid.videoHeight * scale;
+                        canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+                        const b64 = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        try {
+                            const res = await fetch('/api/students/recognize', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ face_image: b64 })
+                            });
+                            if (!res.ok) {
+                                isScanning = false;
+                                return;
+                            }
+                            const data = await res.json();
+                            
+                            if (data.status === 'success' && data.match) {
+                                clearInterval(pollInterval);
+                                Swal.close();
+                                
+                                Swal.fire({ icon: 'success', title: 'Welcome Back!', text: data.student.name, timer: 1500, showConfirmButton: false, background: '#11151A', color: '#fff' });
+                                document.getElementById('homeStudentId').value = data.student.id;
+                                setTimeout(proceedToScan, 1500);
+                            }
+                        } catch (err) {}
+                        isScanning = false;
+                    }, 1000);
+                    
+                } catch(e) {
+                    Swal.showValidationMessage('Webcam access denied or unavailable.');
+                }
+            },
+            willClose: () => {
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                if (pollInterval) clearInterval(pollInterval);
+            },
+            preConfirm: () => {
+                const video = document.getElementById('loginVideo');
+                const canvas = document.getElementById('loginCanvas');
+                const scale = Math.min(1.0, 640 / video.videoWidth);
+                canvas.width = video.videoWidth * scale;
+                canvas.height = video.videoHeight * scale;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                return canvas.toDataURL('image/jpeg', 0.8);
             }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await processFaceLogin(result.value);
+            }
+        });
+    }
 
-            loading.style.display = 'block';
-            results.style.display = 'none';
-            analyzeBtn.disabled = true;
+    async function processFaceLogin(base64Image) {
+        Swal.fire({ title: 'Recognizing...', background: '#11151A', color: '#fff', didOpen: () => Swal.showLoading() });
+        try {
+            const response = await fetch('/api/students/recognize', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ face_image: base64Image })
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success' && data.match) {
+                Swal.fire({ icon: 'success', title: 'Welcome Back!', text: data.student.name, timer: 1500, showConfirmButton: false, background: '#11151A', color: '#fff' });
+                document.getElementById('homeStudentId').value = data.student.id;
+                setTimeout(proceedToScan, 1500);
+            } else {
+                Swal.fire({ icon: 'error', title: 'Not Recognized', text: 'Face not found in database.', background: '#11151A', color: '#fff' });
+            }
+        } catch(e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to process face login.', background: '#11151A', color: '#fff' });
+        }
+    }
 
-            const age = document.getElementById('ageInput').value;
+    async function registerStudent() {
+        // Auto-generate a short unique Student ID (e.g., S482)
+        const id = 'S' + Math.floor(100 + Math.random() * 900);
+        const name = document.getElementById('regName').value;
+        const age = document.getElementById('regAge').value;
+
+        if (!name || !age) {
+            Swal.fire({ icon: 'warning', title: 'Missing Fields', text: 'Please fill out all fields.', background: '#11151A', color: '#fff' });
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/students/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    id, name, age: parseInt(age), 
+                    class_number: "Unknown", 
+                    face_image: registrationFaceBase64 
+                })
+            });
+            const data = await response.json();
+            
+            if (!response.ok || data.status === 'error') {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Registration failed.', background: '#11151A', color: '#fff' });
+            } else {
+                Swal.fire({ icon: 'success', title: 'Success', text: data.message, background: '#11151A', color: '#fff', confirmButtonColor: '#22C55E' });
+                // Switch back to scan tab and prefill
+                document.getElementById('homeStudentId').value = id;
+                switchHomeTab('scan');
+            }
+        } catch(e) {
+            Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Could not connect to backend.', background: '#11151A', color: '#fff' });
+        }
+    }
+
+    // Handle File Input Preview
+    document.getElementById('inputFile').addEventListener('change', function(e) {
+        if(e.target.files && e.target.files[0]) {
+            window.capturedMealBase64 = null; // reset webcam capture
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('mealImage').src = evt.target.result;
+                document.getElementById('scannerLine').style.display = 'none';
+                document.getElementById('camera-placeholder').innerHTML = `<img src="${evt.target.result}" class="w-full h-auto object-contain">`;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    async function captureMealPhoto() {
+        let stream = null;
+        Swal.fire({
+            title: 'Capture Meal',
+            html: '<video id="mealVideo" width="480" height="360" autoplay playsinline muted style="border-radius:10px; margin:auto;"></video><canvas id="mealCanvas" style="display:none;"></canvas>',
+            showCancelButton: true,
+            confirmButtonText: 'Snap & Use',
+            confirmButtonColor: '#22C55E',
+            background: '#11151A', color: '#fff',
+            width: 'auto',
+            didOpen: async () => {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    const vid = document.getElementById('mealVideo');
+                    vid.srcObject = stream;
+                    vid.play().catch(e => console.warn(e));
+                } catch(e) {
+                    Swal.showValidationMessage('Webcam access denied or unavailable.');
+                }
+            },
+            willClose: () => {
+                if (stream) stream.getTracks().forEach(t => t.stop());
+            },
+            preConfirm: () => {
+                const video = document.getElementById('mealVideo');
+                const canvas = document.getElementById('mealCanvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                return canvas.toDataURL('image/jpeg');
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const dataUrl = result.value;
+                document.getElementById('mealImage').src = dataUrl;
+                document.getElementById('scannerLine').style.display = 'none';
+                document.getElementById('inputFile').value = '';
+                window.capturedMealBase64 = dataUrl;
+                document.getElementById('camera-placeholder').innerHTML = `<img src="${dataUrl}" class="w-full h-auto object-contain">`;
+            }
+        });
+    }
+
+    function proceedToScan() {
+        const sid = document.getElementById('homeStudentId').value;
+        const sage = document.getElementById('homeAge').value;
+        currentStudentAge = sage ? parseInt(sage) : 12;
+        
+        if (sid) {
+            document.getElementById('nav-student-indicator').style.display = 'flex';
+            document.getElementById('nav-student-id').innerText = sid;
+        } else {
+            document.getElementById('nav-student-indicator').style.display = 'flex';
+            document.getElementById('nav-student-id').innerText = "Age " + currentStudentAge;
+        }
+        hasEnteredStudent = true;
+        nav('screen-scan');
+    }
+
+    async function startAnalysis() {
+        const fileInput = document.getElementById('inputFile');
+        const file = fileInput.files[0];
+        const capturedBase64 = window.capturedMealBase64;
+        
+        if (!file && !capturedBase64) {
+            Swal.fire({ icon: 'warning', title: 'Wait!', text: 'Please upload or capture a plate image.', background: '#11151A', color: '#fff' });
+            return;
+        }
+
+        // Navigate to Analysis Screen
+        nav('screen-analysis');
+        
+        // Reset overlay
+        const canvas = document.getElementById('overlayCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        document.getElementById('scannerLine').style.display = 'block';
+
+        // Reset steps
+        ['step-1','step-2','step-3','step-4'].forEach(s => {
+            const el = document.getElementById(s);
+            el.innerHTML = el.innerHTML.replace('check-circle-2', 'circle').replace('text-pass', '');
+        });
+
+        // GSAP Scanner Animation
+        const scanner = document.getElementById('scannerLine');
+        gsap.to(scanner, { opacity: 1, duration: 0.3 });
+        const scanAnim = gsap.fromTo(scanner, 
+            { top: "0%" }, 
+            { top: "100%", duration: 1.5, repeat: -1, yoyo: true, ease: "linear" }
+        );
+
+        let base64Data = capturedBase64;
+        
+        const processWithBase64 = async (b64) => {
+            const imgEl = document.getElementById('mealImage');
+            imgEl.src = b64;
+            currentImage = b64;
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/analyze', {
+                // Call API
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        age: parseInt(age),
-                        image_data: base64Image
+                        student_id: document.getElementById('homeStudentId').value || null,
+                        age: currentStudentAge,
+                        meal_type: "lunch",
+                        image_data: b64
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.statusText}`);
-                }
-
+                if (!response.ok) throw new Error("API failed");
                 const data = await response.json();
+                globalResult = data;
                 
-                // Display Results
-                document.getElementById('scoreVal').innerText = data.score;
-                const statusEl = document.getElementById('statusVal');
-                statusEl.innerText = data.status;
-                statusEl.className = `status ${data.status}`;
+                // Stop scanning
+                scanAnim.kill();
+                gsap.to(scanner, { opacity: 0, duration: 0.3 });
                 
-                document.getElementById('explanationVal').innerText = data.explanation;
+                // GSAP Sequence for Fake Steps
+                const tl = gsap.timeline();
+                tl.to("#step-1", { duration: 0.5, opacity: 1, onStart: () => updateStep('step-1') })
+                  .to("#step-2", { duration: 0.5, opacity: 1, onStart: () => updateStep('step-2') })
+                  .to("#step-3", { duration: 0.5, opacity: 1, onStart: () => updateStep('step-3') })
+                  .to("#step-4", { duration: 0.5, opacity: 1, onStart: () => updateStep('step-4') })
+                  .call(() => {
+                      drawDetections(data.detection.detections, imgEl);
+                  })
+                  .to({}, { duration: 1 }) // Wait 1s
+                  .call(() => {
+                      buildResultScreen();
+                  });
+            } catch (err) {
+                console.error(err);
+                scanAnim.kill();
+                gsap.to(scanner, { opacity: 0 });
+                Swal.fire({ icon: 'error', title: 'Analysis Failed', text: 'Backend connection error or processing failed.', background: '#11151A', color: '#fff' });
+                nav('screen-scan');
+            }
+        };
 
-                // Foods
-                const foodsList = document.getElementById('foodsList');
-                foodsList.innerHTML = '';
-                for (const [food, qty] of Object.entries(data.quantities)) {
-                    const li = document.createElement('li');
-                    li.innerText = `${food}: ${qty}g`;
-                    foodsList.appendChild(li);
-                }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => processWithBase64(e.target.result);
+            reader.readAsDataURL(file);
+        } else {
+            await processWithBase64(base64Data);
+        }
+    }
 
-                // Recommendations
-                const recList = document.getElementById('recommendationsList');
-                recList.innerHTML = '';
-                data.recommendations.forEach(rec => {
-                    const li = document.createElement('li');
-                    li.innerText = rec;
-                    recList.appendChild(li);
-                });
+    function updateStep(stepId) {
+        const el = document.getElementById(stepId);
+        el.innerHTML = el.innerHTML.replace('circle', 'check-circle-2').replace('w-4', 'w-4 text-pass');
+        lucide.createIcons();
+    }
 
-                // Raw JSON
-                document.getElementById('rawJson').innerText = JSON.stringify(data, null, 2);
+    function drawDetections(detections, imgEl) {
+        const canvas = document.getElementById('overlayCanvas');
+        const ctx = canvas.getContext('2d');
 
-                // Draw Bounding Boxes
-                overlay.width = preview.width;
-                overlay.height = preview.height;
-                const scaleX = preview.width / preview.naturalWidth;
-                const scaleY = preview.height / preview.naturalHeight;
+        canvas.width = imgEl.clientWidth;
+        canvas.height = imgEl.clientHeight;
+
+        const scaleX = imgEl.clientWidth / imgEl.naturalWidth;
+        const scaleY = imgEl.clientHeight / imgEl.naturalHeight;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // GSAP Staggered Drawing
+        detections.forEach((d, i) => {
+            setTimeout(() => {
+                const [x1, y1, x2, y2] = d.bbox;
+                const sx1 = x1 * scaleX, sy1 = y1 * scaleY, w = (x2-x1) * scaleX, h = (y2-y1) * scaleY;
                 
-                ctx.clearRect(0, 0, overlay.width, overlay.height);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#2ecc71'; // Green box
-                ctx.fillStyle = '#2ecc71';
-                ctx.font = '16px Arial';
+                // Box
+                ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(sx1, sy1, w, h);
+                
+                // Label background
+                ctx.fillStyle = 'rgba(17, 21, 26, 0.9)';
+                ctx.fillRect(sx1, sy1 - 25, w, 25);
+                
+                // Label text
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px "JetBrains Mono"';
+                ctx.fillText(`${d.food.toUpperCase()} ${(d.confidence*100).toFixed(0)}%`, sx1 + 5, sy1 - 8);
+                
+            }, i * 300); // 300ms stagger
+        });
+    }
 
-                const detections = data.detection.detections || [];
-                detections.forEach(d => {
-                    const [x1, y1, x2, y2] = d.bbox;
-                    const w = (x2 - x1) * scaleX;
-                    const h = (y2 - y1) * scaleY;
-                    const rx = x1 * scaleX;
-                    const ry = y1 * scaleY;
+    function buildResultScreen() {
+        const res = globalResult;
+        
+        // Populate Foods
+        const foodsDiv = document.getElementById('res-foods');
+        foodsDiv.innerHTML = "";
+        for (const [food, weight] of Object.entries(res.quantities)) {
+            foodsDiv.innerHTML += `
+                <div class="flex justify-between items-center pb-2 border-b border-bordercolor/50 last:border-0">
+                    <span class="text-white">${food.toUpperCase()}</span>
+                    <span class="text-gray-400">~<span class="text-white tech-number count-up-small" data-val="${Math.round(weight)}">0</span>g</span>
+                </div>`;
+        }
+        
+        // Status Colors
+        const statusEl = document.getElementById('res-status');
+        const ringEl = document.getElementById('scoreRing');
+        
+        statusEl.innerText = res.status;
+        statusEl.className = "text-lg font-bold tracking-widest uppercase mb-6";
+        
+        let strokeColor = "#EF4444"; // FAIL
+        if(res.status === "PASS") { strokeColor = "#22C55E"; statusEl.classList.add("text-pass"); }
+        else if(res.status === "REVIEW") { strokeColor = "#F59E0B"; statusEl.classList.add("text-review"); }
+        else { statusEl.classList.add("text-fail"); }
+        
+        ringEl.setAttribute('stroke', strokeColor);
+        
+        // SVG Ring Animation (283 is circumference of r=45)
+        const offset = 283 - (283 * (res.score / 100));
+        setTimeout(() => { ringEl.style.strokeDashoffset = offset; }, 100);
 
-                    ctx.strokeRect(rx, ry, w, h);
-                    
-                    // Draw label background
-                    const label = `${d.food} (${Math.round(d.confidence * 100)}%)`;
-                    const textWidth = ctx.measureText(label).width;
-                    ctx.fillRect(rx, ry - 20, textWidth + 10, 20);
-                    
-                    // Draw label text
-                    ctx.fillStyle = 'white';
-                    ctx.fillText(label, rx + 5, ry - 5);
-                    ctx.fillStyle = '#2ecc71'; // reset for next box
-                });
+        // Nutrition
+        document.getElementById('res-cal').setAttribute('data-val', Math.round(res.nutrition.calories));
+        document.getElementById('res-pro').setAttribute('data-val', Math.round(res.nutrition.protein));
+        document.getElementById('res-carb').setAttribute('data-val', Math.round(res.nutrition.carbs));
+        document.getElementById('res-score').setAttribute('data-val', Math.round(res.score));
 
-                results.style.display = 'block';
-            } catch (error) {
-                alert("Error: " + error.message);
-                console.error(error);
-            } finally {
-                loading.style.display = 'none';
-                analyzeBtn.disabled = false;
+        // Recommendations
+        const recDiv = document.getElementById('res-rec');
+        recDiv.innerHTML = "";
+        res.recommendations.forEach(r => {
+            recDiv.innerHTML += `<div class="flex items-start gap-2 mb-2"><i data-lucide="arrow-right" class="w-4 h-4 mt-0.5 flex-shrink-0 text-white"></i> <span>${r}</span></div>`;
+        });
+
+        // Move Image Container to Results
+        document.getElementById('res-image-placeholder').appendChild(document.getElementById('mainImageContainer'));
+
+        // Switch Screen
+        nav('screen-result');
+        lucide.createIcons();
+
+        // Animate Numbers
+        document.querySelectorAll('.count-up, .count-up-small').forEach(el => {
+            const end = parseInt(el.getAttribute('data-val'));
+            gsap.to(el, {
+                innerHTML: end,
+                duration: 1.5,
+                snap: { innerHTML: 1 },
+                ease: "power2.out"
+            });
+        });
+    }
+
+    function showWhy() {
+        if (!globalResult) return;
+        
+        // Format the explanation neatly
+        const issuesHtml = globalResult.explanation.split("\\n").map(iss => {
+            const isGood = iss.includes("meets all");
+            const icon = isGood ? 'check-circle-2' : 'alert-triangle';
+            const color = isGood ? '#22C55E' : '#F59E0B';
+            return `<div style="display:flex; align-items:start; margin-bottom:12px; text-align:left; font-size:14px;">
+                        <i data-lucide="${icon}" style="color:${color}; width:18px; height:18px; margin-right:8px; margin-top:2px;"></i>
+                        <span style="color:#c9d1d9;">${iss}</span>
+                    </div>`;
+        }).join("");
+
+        Swal.fire({
+            title: '<span style="font-size: 16px; letter-spacing: 1px; color:#9CA3AF;">WHY THIS SCORE?</span>',
+            html: `<div style="margin-top:20px; border-top:1px solid #242A31; padding-top:20px;">${issuesHtml}</div>`,
+            background: '#11151A',
+            color: '#fff',
+            confirmButtonText: 'CLOSE',
+            confirmButtonColor: '#242A31',
+            customClass: { popup: 'border border-gray-800 rounded-2xl' },
+            didOpen: () => { lucide.createIcons(); }
+        });
+    }
+
+    function saveMeal() {
+        Swal.fire({
+            title: 'Meal Saved',
+            text: "Meal has been added to history.",
+            icon: 'success',
+            background: '#11151A',
+            color: '#fff',
+            confirmButtonColor: '#242A31',
+            iconColor: '#22C55E'
+        });
+        nav('screen-history');
+    }
+
+    async function fetchHistory() {
+        try {
+            const response = await fetch('/api/meals/history');
+            const data = await response.json();
+            const container = document.getElementById('history-container');
+            container.innerHTML = "";
+            
+            if (data.history.length === 0) {
+                container.innerHTML = "<p class='text-gray-500 text-center py-10'>No meals recorded yet.</p>";
+                return;
+            }
+
+            data.history.forEach(m => {
+                let sCol = m.status === 'PASS' ? 'text-pass' : (m.status === 'REVIEW' ? 'text-review' : 'text-fail');
+                let sBor = m.status === 'PASS' ? 'border-pass/30' : (m.status === 'REVIEW' ? 'border-review/30' : 'border-fail/30');
+                
+                const foods = Object.entries(m.estimated_quantities).map(([k,v]) => `${k} (~${Math.round(v)}g)`).join(', ');
+                
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-bgbase border border-bordercolor border-l-4 ${sBor} rounded-lg p-4 cursor-pointer hover:bg-surface transition-colors">
+                        <div>
+                            <div class="text-sm font-semibold mb-1 text-white">${new Date(m.analysis_date).toLocaleDateString()} - Age Group: ${m.age_group}</div>
+                            <div class="text-xs text-gray-400 font-mono">${foods}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-bold tech-number ${sCol}">${m.score}</div>
+                            <div class="text-[10px] text-gray-500 uppercase tracking-widest">${m.status}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        } catch(e) { console.error(e); }
+    }
+
+    async function fetchDashboard() {
+        try {
+            const response = await fetch('/api/dashboard/stats');
+            const data = await response.json();
+            
+            animateValue(document.getElementById('dash-total'), 0, data.total_meals, 1000);
+            animateValue(document.getElementById('dash-avg'), 0, data.average_score, 1000);
+            animateValue(document.getElementById('dash-pass'), 0, data.pass_rate, 1000, '%');
+            
+            // Protein missing = total - protein_days
+            const proMissing = data.total_meals > 0 ? ((data.total_meals - data.protein_days) / data.total_meals) * 100 : 0;
+            const fruitMissing = data.total_meals > 0 ? ((data.total_meals - data.fruit_days) / data.total_meals) * 100 : 0;
+            
+            document.getElementById('dash-pro-pct').innerText = Math.round(proMissing) + "%";
+            document.getElementById('dash-fruit-pct').innerText = Math.round(fruitMissing) + "%";
+            
+            gsap.to(document.getElementById('dash-pro-bar'), { width: proMissing + "%", duration: 1.5, ease: "power2.out" });
+            gsap.to(document.getElementById('dash-fruit-bar'), { width: fruitMissing + "%", duration: 1.5, ease: "power2.out" });
+            
+            const tfDiv = document.getElementById('dash-top-foods');
+            tfDiv.innerHTML = "";
+            data.top_foods.forEach(f => {
+                tfDiv.innerHTML += `
+                    <div class="flex justify-between border-b border-bordercolor/50 pb-2 last:border-0">
+                        <span class="text-white capitalize">${f.name}</span>
+                        <span class="text-gray-400">${f.count} times</span>
+                    </div>
+                `;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function animateValue(obj, start, end, duration, suffix="") {
+        gsap.to(obj, {
+            innerHTML: end,
+            duration: duration/1000,
+            snap: { innerHTML: 1 },
+            ease: "power2.out",
+            onUpdate: function() {
+                obj.innerHTML = Math.round(this.targets()[0].innerHTML) + suffix;
             }
         });
-    </script>
+    }
+</script>
 </body>
 </html>
