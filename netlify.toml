@@ -1,0 +1,12 @@
+[build]
+  # We do not need a build command for vanilla HTML/JS/CSS
+  command = ""
+  
+  # Tell Netlify to serve the 'frontend' directory
+  publish = "frontend"
+
+[[redirects]]
+  # Simple fallback redirect to index.html for any single page app routing
+  from = "/*"
+  to = "/index.html"
+  status = 200

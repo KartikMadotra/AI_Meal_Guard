@@ -447,7 +447,7 @@
                         const b64 = canvas.toDataURL('image/jpeg', 0.8);
                         
                         try {
-                            const res = await fetch('/api/students/check_face', {
+                            const res = await fetch(`${API_BASE}/api/students/check_face`, {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
                                 body: JSON.stringify({ face_image: b64 })
@@ -526,7 +526,7 @@
                         const b64 = canvas.toDataURL('image/jpeg', 0.8);
                         
                         try {
-                            const res = await fetch('/api/students/recognize', {
+                            const res = await fetch(`${API_BASE}/api/students/recognize`, {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
                                 body: JSON.stringify({ face_image: b64 })
@@ -576,7 +576,7 @@
     async function processFaceLogin(base64Image) {
         Swal.fire({ title: 'Recognizing...', background: '#11151A', color: '#fff', didOpen: () => Swal.showLoading() });
         try {
-            const response = await fetch('/api/students/recognize', {
+            const response = await fetch(`${API_BASE}/api/students/recognize`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ face_image: base64Image })
@@ -607,7 +607,7 @@
         }
 
         try {
-            const response = await fetch('/api/students/register', {
+            const response = await fetch(`${API_BASE}/api/students/register`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 
@@ -747,7 +747,7 @@
 
             try {
                 // Call API
-                const response = await fetch('/api/analyze', {
+                const response = await fetch(`${API_BASE}/api/analyze`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -944,7 +944,7 @@
 
     async function fetchHistory() {
         try {
-            const response = await fetch('/api/meals/history');
+            const response = await fetch(`${API_BASE}/api/meals/history`);
             const data = await response.json();
             const container = document.getElementById('history-container');
             container.innerHTML = "";
@@ -979,7 +979,7 @@
 
     async function fetchDashboard() {
         try {
-            const response = await fetch('/api/dashboard/stats');
+            const response = await fetch(`${API_BASE}/api/dashboard/stats`);
             const data = await response.json();
             
             animateValue(document.getElementById('dash-total'), 0, data.total_meals, 1000);
