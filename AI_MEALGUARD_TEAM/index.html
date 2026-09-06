@@ -337,8 +337,7 @@ footer { margin-top: 60px; padding-top: 25px; border-top: 1px solid var(--border
     <a href="#future">40 Future Scope</a>
     <a href="#sources">41 Sources</a>
     <a href="#handover">42 Handover</a>
-    <a href="#designspec">43 Design Spec</a>
-  </nav>
+    </nav>
 </aside>
 
 <!-- SPEAK BUTTON -->
@@ -1278,6 +1277,51 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]</pre>
     <tr><td>History Fetch</td><td>GET /api/meals/history</td><td>Last 50 meals returned</td><td>API response</td></tr>
     <tr><td>What-If Simulator</td><td>Adjust dal slider</td><td>Score recalculates in real-time</td><td>Before/After</td></tr>
   </table>
+
+  <h3 style="margin-top:40px;">Visual Evidence & Test Outputs</h3>
+  <div class="grid3">
+    <article>
+      <h4>Starting Page</h4>
+      <img src="../backend/results/startingpage.png" alt="Starting Page" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Welcome</h4>
+      <img src="../backend/results/welcome_b.png" alt="Welcome" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Register Student</h4>
+      <img src="../backend/results/register_student.png" alt="Register Student" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Scanning</h4>
+      <img src="../backend/results/scanning.png" alt="Scanning" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Analysis Result</h4>
+      <img src="../backend/results/final_result.png" alt="Final Result" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Weekly History</h4>
+      <img src="../backend/results/weekly history.png" alt="Weekly History" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Statistics</h4>
+      <img src="../backend/results/statistics.png" alt="Statistics" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Confusion Matrix</h4>
+      <img src="../backend/results/confusion_matrix.png" alt="Confusion Matrix" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>F1 Curve (Mask)</h4>
+      <img src="../backend/results/MaskF1_curve.png" alt="Mask F1 Curve" style="width:100%; border-radius:8px;">
+    </article>
+    <article>
+      <h4>Validation Batch</h4>
+      <img src="../backend/results/val_batch0_pred.jpg" alt="Val Batch Pred" style="width:100%; border-radius:8px;">
+    </article>
+  </div>
+
 </section>
 
 <!-- ═══════════════════════ 37 EDGE CASES ═══════════════════════ -->
@@ -1388,193 +1432,6 @@ CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]</pre>
 </section>
 
 <footer>AI MealGuard · Complete Team Documentation (42 Sections) · Video storyboard and judge Q&A intentionally excluded.</footer>
-<section id="designspec">
-  <label>UI/UX SYSTEM ARCHITECTURE</label>
-  <h2>43. Frontend Design &amp; Styling Specification</h2>
-  <p>The following is the complete styling and feature specification used to build the Cinematic AI Dashboard application.</p>
-  <article>
-  <p style="margin-bottom:8px;">AI MealGuard — Complete Features + Styling Specification</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">1. Overall Design Language</h3>
-  <p style="margin-bottom:8px;">Theme</p>
-  <p style="margin-bottom:8px;">Minimalist cinematic AI dashboard</p>
-  <p style="margin-bottom:8px;">Not:</p>
-  <div style="margin-bottom:6px; color:var(--fail); font-weight:600;">❌ Generic Bootstrap admin panel</div>
-  <div style="margin-bottom:6px; color:var(--fail); font-weight:600;">❌ Colorful school-project infographic</div>
-  <div style="margin-bottom:6px; color:var(--fail); font-weight:600;">❌ Too many cards everywhere</div>
-  <div style="margin-bottom:6px; color:var(--fail); font-weight:600;">❌ Excessive gradients</div>
-  <div style="margin-bottom:6px; color:var(--fail); font-weight:600;">❌ Cartoonish AI graphics</div>
-  <p style="margin-bottom:8px;">Instead:</p>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Dark premium interface</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Clean typography</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Real food imagery</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Thin borders</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Subtle glass/transparency</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Large numbers</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Real AI overlays</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Smooth animations</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ Lots of controlled empty space</div>
-  <div style="margin-bottom:6px; color:var(--accent); font-weight:600;">✅ "AI laboratory / intelligent monitoring system" feeling</div>
-  <p style="margin-bottom:8px;">Main colors</p>
-  <p style="margin-bottom:8px;">Background       #0B0D10</p>
-  <p style="margin-bottom:8px;">Surface          #11151A</p>
-  <p style="margin-bottom:8px;">Elevated         #181D23</p>
-  <p style="margin-bottom:8px;">Border           #242A31</p>
-  <p style="margin-bottom:8px;">Primary Text     #F5F7FA</p>
-  <p style="margin-bottom:8px;">Secondary Text   #9CA3AF</p>
-  <p style="margin-bottom:8px;">Muted Text       #66707C</p>
-  <p style="margin-bottom:8px;">PASS             #22C55E</p>
-  <p style="margin-bottom:8px;">REVIEW           #F59E0B</p>
-  <p style="margin-bottom:8px;">FAIL             #EF4444</p>
-  <p style="margin-bottom:8px;">AI Accent        #60A5FA</p>
-  <p style="margin-bottom:8px;">Use accent colors sparingly.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">2. Typography</h3>
-  <p style="margin-bottom:8px;">Use:</p>
-  <p style="margin-bottom:8px;">Primary: Inter (font-family: 'Inter', sans-serif;)</p>
-  <p style="margin-bottom:8px;">Weights:</p>
-  <p style="margin-bottom:8px;">400 → normal text</p>
-  <p style="margin-bottom:8px;">500 → labels</p>
-  <p style="margin-bottom:8px;">600 → buttons</p>
-  <p style="margin-bottom:8px;">700 → headings</p>
-  <p style="margin-bottom:8px;">800 → major numbers</p>
-  <p style="margin-bottom:8px;">Technical numbers: JetBrains Mono</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">3. Global Layout</h3>
-  <p style="margin-bottom:8px;">Desktop:</p>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">┌─────────────────────────────────────────────────────────────┐</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ AI MEALGUARD                       STU-1024    ● SYSTEM OK  │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">├──────────────┬──────────────────────────────────────────────┤</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│              │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ Dashboard    │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ Scan Meal    │              MAIN CONTENT                    │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ History      │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ Reports      │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│              │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│              │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ Admin        │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">│ Settings     │                                              │</pre>
-  <pre style="margin:2px 0; padding:2px 10px; background:transparent; border:none; color:#60A5FA;">└──────────────┴──────────────────────────────────────────────┘</pre>
-  <p style="margin-bottom:8px;">Sidebar Width: 240–260px</p>
-  <p style="margin-bottom:8px;">Style: nearly black background, thin right border, small logo, icon + text navigation, active item has subtle illuminated background, no huge colorful sidebar</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">4. Landing Page</h3>
-  <p style="margin-bottom:8px;">Purpose: Introduce AI MealGuard.</p>
-  <p style="margin-bottom:8px;">Visual: Large dark screen with subtitle "AI-POWERED SMART MONITORING FOR NUTRITIOUS SCHOOL MEALS". Include start analysis button, subtle animated grid, and tiny system indicators.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">5. Student Identification</h3>
-  <p style="margin-bottom:8px;">Feature: Student ID / QR</p>
-  <p style="margin-bottom:8px;">Input: dark surface, 1px border, rounded 10–12px, blue/white focus ring.</p>
-  <p style="margin-bottom:8px;">Button: Minimal "CONTINUE" button.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">6. Face Recognition</h3>
-  <p style="margin-bottom:8px;">Optional implemented feature. Show face registration with face rectangle, scanning line, and confidence indicator.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">7. Face Auto-Login</h3>
-  <p style="margin-bottom:8px;">Camera continuously checks -> 128D encoding -> Database match -> Student identified. UI shows Identifying animation (Scanning face) -> Match Found.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">8. Guest / Age-Only Mode</h3>
-  <p style="margin-bottom:8px;">For users who don't want identification: "CONTINUE WITHOUT STUDENT ID". Age and Age Group dropdowns.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">9. Student Profile</h3>
-  <p style="margin-bottom:8px;">Show student ID, Age, Class, Age Group, Today's meals analyzed, current score, and weekly average score using large typography instead of huge cards.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">10. Meal Scanner</h3>
-  <p style="margin-bottom:8px;">Live camera view with black camera background, rounded corners, thin border, corner brackets, and scanning line.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">11. File Upload</h3>
-  <p style="margin-bottom:8px;">Drag/drop zone or File chooser with image preview before analysis.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">12. AI Analysis Screen</h3>
-  <p style="margin-bottom:8px;">Cinematic rendering showing a real food image, with a horizontal scanner animation traveling down the image, followed by segmentation masks appearing.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">13. Food Detection</h3>
-  <p style="margin-bottom:8px;">Display actual image with segmentation masks, bounding boxes, labels, and confidence percentages. Do not fake the AI overlay.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">14. 50 Food Classes</h3>
-  <p style="margin-bottom:8px;">Searchable table with Category, Confidence, Model Label, and Mapped generic category.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">15. UNSCRAMBLE Label Correction</h3>
-  <p style="margin-bottom:8px;">Expandable section showing the pipeline: Raw Model Label -> UNSCRAMBLE Dictionary -> Correct Food Label -> Nutrition Category. Styled like an AI diagnostic panel.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">16. Unknown Food</h3>
-  <p style="margin-bottom:8px;">Low confidence alert using amber color (not red) indicating the model cannot identify the food.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">17. Quantity Estimation</h3>
-  <p style="margin-bottom:8px;">Visual formula: Pixel Area -> Area Fraction -> 4500g Reference -> Density Factor -> Estimated Weight.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">18. Quantity Results</h3>
-  <p style="margin-bottom:8px;">Estimated quantities for each detected component (e.g., Rice ~120g 94% confidence) with an alert that quantities are estimates.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">19. Nutrition Engine</h3>
-  <p style="margin-bottom:8px;">Clean display of Energy, Protein, Carbs, Fat, Iron, Calcium, and Vitamin C, with values counting upward via animation.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">20. Nutrition Database</h3>
-  <p style="margin-bottom:8px;">Admin data page showing the nutrition values for each food class, referencing IFCT 2017.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">21. Age Requirements</h3>
-  <p style="margin-bottom:8px;">Age selector with progress bars showing how the meal meets Energy, Protein, Iron, and Calcium targets for the selected group.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">22. Meal Score</h3>
-  <p style="margin-bottom:8px;">Hero screen showing the 0-100 score with an animated SVG circle filling up. Includes PASS, REVIEW, or FAIL tag.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">23. Scoring System</h3>
-  <p style="margin-bottom:8px;">Visual breakdown of the weights: Protein 40%, Energy 40%, Variety 20%.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">24. Why This Score?</h3>
-  <p style="margin-bottom:8px;">Detailed explanation showing Actual vs Benchmark vs Gap for each component that didn't meet the target.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">25. Recommendations</h3>
-  <p style="margin-bottom:8px;">Numbered actionable recommendations to improve the score (e.g., "01 INCREASE PROTEIN - Add approx 20-30g dal").</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">26. What-If Simulator</h3>
-  <p style="margin-bottom:8px;">Interactive sliders for each component allowing the user to adjust weights and see the simulated score immediately update.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">27. Meal History</h3>
-  <p style="margin-bottom:8px;">List of past meals with Date, Type, Components, Score, and Status, plus filters.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">28. Meal Detail</h3>
-  <p style="margin-bottom:8px;">Clicking a record shows detailed components and the final score.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">29. Weekly Analytics</h3>
-  <p style="margin-bottom:8px;">Chart.js graph of weekly scores and aggregated metrics (average score, meals analyzed).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">30. Food Frequency</h3>
-  <p style="margin-bottom:8px;">Bar charts showing how often different foods are detected.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">31. School Dashboard</h3>
-  <p style="margin-bottom:8px;">Aggregated monitoring showing total meals analyzed, average score, and pass/review/fail breakdown.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">32. Top Foods</h3>
-  <p style="margin-bottom:8px;">Simple numbered list of the most detected foods.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">33. Common Issues Tracker</h3>
-  <p style="margin-bottom:8px;">Horizontal progress bars showing the most frequent issues (e.g., Protein missing, Fruit missing).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">34. Reports</h3>
-  <p style="margin-bottom:8px;">Weekly meal report with export PDF functionality.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">35. Admin Dashboard</h3>
-  <p style="margin-bottom:8px;">List of technical admin sections.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">36. Student Database</h3>
-  <p style="margin-bottom:8px;">Table showing ID, Age, Class with actions to View, Edit, Register.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">37. CSV Database</h3>
-  <p style="margin-bottom:8px;">Technical documentation showing schemas for students.csv and meal_history.csv.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">38. JSON Storage</h3>
-  <p style="margin-bottom:8px;">Explanation of how complex data (like detections) is serialized inside CSV fields.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">39. FastAPI Backend</h3>
-  <p style="margin-bottom:8px;">Dedicated API page listing endpoints (POST /api/analyze, GET /api/students, etc.).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">40. API Request/Response UI</h3>
-  <p style="margin-bottom:8px;">Code blocks showing JSON request/response formats for endpoints, styled with dark background, monospace font, and syntax highlighting.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">41. Backend Processing</h3>
-  <p style="margin-bottom:8px;">Flowchart from Base64 Image -> Decode -> YOLO -> Segmentation -> Quantity -> Nutrition -> Scoring -> JSON Response.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">42. CORS</h3>
-  <p style="margin-bottom:8px;">Technical settings for allowed origins.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">43. Pydantic Models</h3>
-  <p style="margin-bottom:8px;">Technical documentation for AnalyzeRequest and StudentRegisterRequest models.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">44. Demo/Fallback Mode</h3>
-  <p style="margin-bottom:8px;">Toggle between Live AI and Demo mode for presentations.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">45. Model Information</h3>
-  <p style="margin-bottom:8px;">YOLOv8 Instance Segmentation details (50 Classes, best.pt, Ultralytics/PyTorch).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">46. Dataset Page</h3>
-  <p style="margin-bottom:8px;">Information on Indian Thali Dataset and Supplementary Dataset.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">47. Model Training</h3>
-  <p style="margin-bottom:8px;">Flowchart of Training pipeline and training metrics (Precision, Recall, mAP50).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">48. Training Error / Label Mismatch</h3>
-  <p style="margin-bottom:8px;">Case study on solving the dataset label vs model class mapping problem using the UNSCRAMBLE dictionary.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">49. Testing</h3>
-  <p style="margin-bottom:8px;">Test matrix showing results for edge cases (Multiple foods, Low lighting, etc.).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">50. Deployment</h3>
-  <p style="margin-bottom:8px;">Deployment stack: Docker -> Python 3.11 -> FastAPI -> YOLO -> Port 7860 -> Hugging Face Spaces.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">51. Frontend Technology</h3>
-  <p style="margin-bottom:8px;">List of tech used: HTML5, Tailwind CSS, Bootstrap 5, GSAP, Lucide, Chart.js, SweetAlert2, Canvas, SVG.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">52. Animation System</h3>
-  <p style="margin-bottom:8px;">Rules for animations (fade+translate, count upward, reveal).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">53. Buttons</h3>
-  <p style="margin-bottom:8px;">Styles for Primary, Secondary, Danger, Success buttons (10-12px radius, subtle hover).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">54. Cards</h3>
-  <p style="margin-bottom:8px;">Use cards sparingly. Only when useful, avoid giant colorful cards.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">55. Borders</h3>
-  <p style="margin-bottom:8px;">Use thin borders (1px solid #242A31) and rounded corners (8-14px).</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">56. Glass Effect</h3>
-  <p style="margin-bottom:8px;">Use lightly (rgba(17, 21, 26, 0.75), blur(12px)) only for overlays/modals/navigation.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">57. Food Images</h3>
-  <p style="margin-bottom:8px;">Use real food images with actual segmentation masks, not AI-generated illustrations.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">58. Modals</h3>
-  <p style="margin-bottom:8px;">Use SweetAlert2 for camera prompts and success/error messages.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">59. Mobile Styling</h3>
-  <p style="margin-bottom:8px;">Hamburger menu for sidebar, full-width camera, vertically stacked charts.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">60. Final Navigation</h3>
-  <p style="margin-bottom:8px;">Keep app navigation simple: Dashboard, Scan Meal, History, Reports, Admin, Settings.</p>
-  <h3 style="margin-top:30px; color:var(--primary); font-size:1.4rem;">61. Complete Feature Map</h3>
-  <p style="margin-bottom:8px;">Text-based diagram of Identity -> AI Vision -> Quantity Engine -> Nutrition -> Scoring -> Explainability -> Simulator -> History -> Analytics -> Dashboard.</p>
-  </article>
-</section>
 
 </main>
 
