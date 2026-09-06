@@ -986,11 +986,11 @@ else: status = "FAIL"</pre>
   <div class="mermaid">
     flowchart TD
     A["Score = 68 REVIEW"] --> B["Check Protein"]
-    B --> C{"Protein Score < 80?"}
+    B --> C{"Protein Score &lt; 80?"}
     C -->|Yes| D["Issue: Protein is below benchmark 12.4g vs 20g"]
     C -->|No| E["✅ Protein OK"]
     A --> F["Check Energy"]
-    F --> G{"Energy Score < 80?"}
+    F --> G{"Energy Score &lt; 80?"}
     G -->|Yes| H["Issue: Energy is below benchmark 450kcal vs 650kcal"]
     G -->|No| I["✅ Energy OK"]
     A --> J["Check Variety"]
@@ -1735,7 +1735,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts();
 
   // ── Mermaid ──
-  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#3B82F6', primaryTextColor: '#fff', lineColor: '#9CA3AF', secondaryColor: '#1E293B' } });
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { primaryColor: '#3B82F6', primaryTextColor: '#fff', lineColor: '#9CA3AF', secondaryColor: '#1E293B' } });
 
   // ── SPEAK BUTTON (Indian English Voice) ──
   const speakBtn = document.getElementById('speakBtn');
