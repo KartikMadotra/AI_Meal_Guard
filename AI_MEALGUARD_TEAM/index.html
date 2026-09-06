@@ -1,728 +1,1615 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI MealGuard: Complete Team Brief & Technical Log</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
-  </script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
-    }
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI MealGuard — Complete Team Documentation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-    .blueprint-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
+:root {
+  --bg-main: #0B0E14;
+  --bg-sidebar: rgba(15, 20, 28, 0.85);
+  --bg-card: rgba(22, 28, 40, 0.7);
+  --bg-glass: rgba(11, 14, 20, 0.6);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-main: #F3F4F6;
+  --text-muted: #9CA3AF;
+  --primary: #3B82F6;
+  --primary-glow: rgba(59, 130, 246, 0.4);
+  --accent: #10B981;
+  --warn: #F59E0B;
+  --fail: #EF4444;
+  --glass-blur: blur(16px);
+  --font-family: 'Outfit', sans-serif;
+  --sidebar-width: 290px;
+  --header-height: 70px;
+}
 
-    h1 {
-      color: #58a6ff;
-      font-size: 2.5rem;
-      font-weight: bold;
-      border-bottom: 2px solid #30363d;
-      padding-bottom: 10px;
-      margin-bottom: 30px;
-    }
+[data-theme='light'] {
+  --bg-main: #F8FAFC;
+  --bg-sidebar: rgba(241, 245, 249, 0.85);
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --primary: #2563EB;
+  --primary-glow: rgba(37, 99, 235, 0.3);
+  --accent: #059669;
+  --warn: #D97706;
+}
 
-    h2 {
-      color: #58a6ff;
-      font-size: 1.8rem;
-      margin-top: 50px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #30363d;
-      padding-bottom: 10px;
-    }
+* { box-sizing: border-box; }
 
-    h3 {
-      color: #58a6ff;
-      font-size: 1.5rem;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  display: flex;
+  min-height: 100vh;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+  line-height: 1.7;
+}
 
-    h4 {
-      color: #79c0ff;
-      font-size: 1.2rem;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+body::-webkit-scrollbar { width: 10px; }
+body::-webkit-scrollbar-track { background: var(--bg-main); }
+body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; }
 
-    p,
-    li {
-      line-height: 1.6;
-      margin-bottom: 15px;
-      font-size: 1.05rem;
-    }
+header {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-height);
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; padding: 0 30px;
+  z-index: 1000;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
 
-    strong {
-      color: #79c0ff;
-      font-weight: 700;
-    }
+header b {
+  font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px; margin-right: 15px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
 
-    .box {
-      background: #161b22;
-      border: 1px solid #30363d;
-      padding: 20px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-    }
+header small { color: var(--text-muted); font-weight: 400; font-size: 0.9rem; border-left: 1px solid var(--border-color); padding-left: 15px; }
 
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      background: #161b22;
-      border-radius: 8px;
-      overflow: hidden;
-    }
+header span { margin-left: auto; display: flex; gap: 10px; }
 
-    th,
-    td {
-      border: 1px solid #30363d;
-      padding: 12px;
-      text-align: left;
-    }
+header button, .speak-btn {
+  background: transparent; border: 1px solid var(--border-color); color: var(--text-main);
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; transition: all 0.3s ease;
+}
+header button:hover, .speak-btn:hover {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
 
-    th {
-      background-color: #21262d;
-      color: #58a6ff;
-      font-weight: bold;
-    }
+.speak-btn {
+  position: fixed; bottom: 30px; right: 30px; z-index: 999;
+  width: 56px; height: 56px; font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: none; color: #fff;
+  box-shadow: 0 8px 30px var(--primary-glow);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+.speak-btn.speaking {
+  background: linear-gradient(135deg, var(--fail), var(--warn));
+  animation: none;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 8px 30px var(--primary-glow); }
+  50% { box-shadow: 0 8px 40px rgba(59, 130, 246, 0.6); }
+}
 
-    .img-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
-    }
+#menu { display: none; }
 
-    .img-card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 10px;
-    }
+aside {
+  width: var(--sidebar-width); position: fixed; top: var(--header-height); bottom: 0; left: 0;
+  background: var(--bg-sidebar); backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto; padding: 20px 15px; z-index: 900;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+aside::-webkit-scrollbar { width: 6px; }
+aside::-webkit-scrollbar-track { background: transparent; }
+aside::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
-    .img-card img {
-      width: 100%;
-      border-radius: 4px;
-    }
+aside strong { display: block; font-size: 0.7rem; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 12px; padding-left: 10px; }
 
-    .img-caption {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #8b949e;
-      margin-top: 10px;
-    }
+nav { display: flex; flex-direction: column; gap: 3px; }
+nav a {
+  text-decoration: none; color: var(--text-muted); padding: 8px 12px;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.3s ease;
+}
+nav a:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+nav a.active { color: #fff; background: var(--primary); box-shadow: 0 4px 15px var(--primary-glow); }
 
-    .diagram-container {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 20px;
-      overflow-x: auto;
-      margin: 30px 0;
-    }
+main {
+  margin-left: var(--sidebar-width); margin-top: var(--header-height);
+  padding: 40px 50px; width: calc(100% - var(--sidebar-width)); max-width: 1200px;
+}
 
-    .metric-box {
-      background: #1f2937;
-      border: 1px solid #3b82f6;
-      border-radius: 8px;
-      padding: 20px;
-      display: flex;
-      justify-content: space-around;
-      margin: 30px 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
+section { display: none; animation: fadeIn 0.5s ease-out forwards; }
+section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-    .metric-item {
-      text-align: center;
-    }
+label { display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; }
 
-    .metric-val {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #22c55e;
-    }
+h1 { font-size: 3.5rem; font-weight: 800; margin: 0 0 10px; line-height: 1.1; background: linear-gradient(135deg, #fff, #9CA3AF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme='light'] h1 { background: linear-gradient(135deg, #0F172A, #64748B); -webkit-background-clip: text; }
+h2 { font-size: 2.2rem; font-weight: 700; margin: 0 0 20px; letter-spacing: -0.5px; }
+h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 12px; }
+p { font-size: 1.05rem; color: var(--text-muted); max-width: 800px; margin-bottom: 25px; }
 
-    .metric-label {
-      font-size: 0.9rem;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+.actions { display: flex; gap: 15px; margin: 30px 0; }
+button.primary { background: var(--primary); color: #fff; border: none; padding: 14px 28px; border-radius: 30px; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 25px var(--primary-glow); transition: transform 0.3s, box-shadow 0.3s; }
+button.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px var(--primary-glow); }
+button.secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 14px 28px; border-radius: 30px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+button.secondary:hover { background: rgba(255, 255, 255, 0.05); }
 
-    .storyboard-scene {
-      border-left: 4px solid #3b82f6;
-      padding-left: 20px;
-      margin-bottom: 30px;
-    }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-bottom: 25px; }
+.cards.small { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 
-    .scene-title {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #e6edf3;
-      margin-bottom: 10px;
-    }
+article {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  padding: 22px; border-radius: 14px;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative; overflow: hidden;
+}
+article::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); opacity: 0; transition: opacity 0.3s ease; }
+article:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+article:hover::before { opacity: 1; }
+article b { display: block; font-size: 2.2rem; font-weight: 800; color: var(--border-color); line-height: 1; margin-bottom: 12px; }
+article small { display: inline-block; background: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; margin-bottom: 12px; }
 
-    .math-block {
-      background: #010409;
-      border-left: 4px solid #a371f7;
-      padding: 15px;
-      font-family: 'Courier New', monospace;
-      font-size: 1.1rem;
-      color: #d2a8ff;
-      margin: 20px 0;
-      overflow-x: auto;
-    }
-    .tts-button {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s;
-    }
-    .tts-button:hover {
-      background: #2563eb;
-    }
-  </style>
+ul { padding-left: 20px; margin: 0; color: var(--text-muted); }
+ul li { margin-bottom: 6px; }
+
+.stats, .metrics { display: flex; flex-wrap: wrap; gap: 18px; margin: 30px 0; }
+.stats div, .metrics div { background: var(--bg-card); border: 1px solid var(--border-color); padding: 18px 25px; border-radius: 14px; flex: 1; min-width: 180px; display: flex; flex-direction: column; }
+.stats b, .metrics b { font-size: 2.2rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+.stats strong, .metrics strong { font-size: 1rem; color: var(--primary); }
+.stats small, .metrics small { color: var(--text-muted); font-size: 0.85rem; }
+
+.notice { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 0.95rem; }
+.notice.warn { background: rgba(245, 158, 11, 0.1); border-left-color: var(--warn); }
+.notice.fail { background: rgba(239, 68, 68, 0.1); border-left-color: var(--fail); }
+.notice.pass { background: rgba(16, 185, 129, 0.1); border-left-color: var(--accent); }
+
+.flowrow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--bg-card); padding: 25px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 25px; }
+.flowrow span { text-align: center; font-weight: 600; font-size: 0.85rem; background: rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 8px; color: var(--text-main); }
+
+table { width: 100%; border-collapse: collapse; margin: 25px 0; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+th, td { padding: 12px 18px; text-align: left; border-bottom: 1px solid var(--border-color); }
+th { background: rgba(0, 0, 0, 0.2); font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+td { color: var(--text-muted); font-size: 0.9rem; }
+
+.numbered { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+.numbered span { background: var(--bg-card); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-color); font-weight: 500; display: flex; align-items: center; }
+.numbered span::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; margin-right: 15px; flex-shrink: 0; }
+
+.mermaid { background: var(--bg-card); padding: 25px; border-radius: 14px; border: 1px solid var(--border-color); margin: 25px 0; overflow-x: auto; text-align: center; }
+
+pre { background: #0f172a; color: #38bdf8; padding: 18px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; overflow-x: auto; border: 1px solid var(--border-color); line-height: 1.6; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tags span { background: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+
+.sim { background: var(--bg-card); padding: 25px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 18px; }
+.sim label { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; color: var(--text-main); }
+.sim input[type="range"] { flex: 1; accent-color: var(--primary); }
+.sim output { width: 50px; text-align: right; font-weight: 700; }
+#simscore { font-size: 2.5rem; text-align: center; margin-top: 25px; margin-bottom: 0; }
+#simscore .highlight { color: var(--primary); }
+
+.checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 25px; }
+.checks label { display: flex; align-items: center; gap: 10px; color: var(--text-muted); cursor: pointer; text-transform: none; font-size: 0.9rem; letter-spacing: normal; }
+.checks input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.final { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); border: 1px solid var(--accent); padding: 25px; border-radius: 14px; font-size: 1.05rem; }
+
+.chart-container { background: var(--bg-card); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color); margin-top: 18px; }
+
+footer { margin-top: 60px; padding-top: 25px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+
+.bars p { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+.bars b { height: 12px; background: var(--primary); border-radius: 6px; display: inline-block; }
+
+.result { background: var(--bg-card); border: 2px solid var(--accent); padding: 25px; border-radius: 14px; text-align: center; margin-bottom: 18px; }
+.result b { font-size: 3.5rem; color: var(--accent); display: block; line-height: 1; }
+.result span { font-size: 1rem; color: var(--text-muted); margin-top: 12px; display: block; }
+
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+.modal.show { display: flex; opacity: 1; }
+.modalbox { background: var(--bg-card); padding: 25px; border-radius: 14px; width: 90%; max-width: 600px; position: relative; border: 1px solid var(--border-color); }
+.modalbox input { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); padding: 12px 18px; border-radius: 8px; color: var(--text-main); font-size: 1rem; font-family: var(--font-family); margin-bottom: 18px; }
+.modalbox input:focus { outline: none; border-color: var(--primary); }
+.modalbox button { position: absolute; top: -12px; right: -12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#sr { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+#sr a { padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; color: var(--text-main); text-decoration: none; font-weight: 500; transition: background 0.2s; }
+#sr a:hover { background: var(--primary); color: #fff; }
+
+.endpoint { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; margin-bottom: 18px; }
+.endpoint .method { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-right: 10px; }
+.endpoint .get { background: rgba(16, 185, 129, 0.2); color: var(--accent); }
+.endpoint .post { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
+.endpoint .path { font-family: monospace; font-weight: 600; }
+
+@media (max-width: 900px) {
+  :root { --sidebar-width: 250px; }
+  main { padding: 25px 18px; }
+  h1 { font-size: 2.5rem; }
+  .grid3, .grid4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  #menu { display: flex; }
+  header b { display: none; }
+  aside { transform: translateX(-100%); }
+  aside.open { transform: translateX(0); }
+  main { margin-left: 0; width: 100%; }
+  .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+}
+</style>
 </head>
-
 <body>
+<header>
+  <button id="menu">☰</button>
+  <b>AI MealGuard</b>
+  <small>Complete Team Documentation — 40+ Sections</small>
+  <span>
+    <button id="search">⌕</button>
+    <button id="theme">◐</button>
+  </span>
+</header>
+<aside id="side">
+  <strong>🏠 OVERVIEW</strong>
+  <nav>
+    <a href="#overview">01 Overview</a>
+    <a href="#problem">02 Problem</a>
+    <a href="#sdg">03 SDG 2</a>
+    <a href="#solution">04 Solution</a>
+    <a href="#innovation">05 Innovation</a>
+    <a href="#roles">06 Users & Roles</a>
+  </nav>
+  <strong style="margin-top:18px">🔬 AI & VISION</strong>
+  <nav>
+    <a href="#flow">07 User Flow</a>
+    <a href="#identification">08 Student ID</a>
+    <a href="#facerecog">09 Face Recognition</a>
+    <a href="#cv">10 Computer Vision</a>
+    <a href="#yolo">11 YOLOv8</a>
+    <a href="#segmentation">12 Segmentation</a>
+    <a href="#pipeline">13 AI Pipeline</a>
+    <a href="#dataset">14 50 Classes</a>
+    <a href="#trainingdata">15 Training Data</a>
+    <a href="#training">16 Training</a>
+    <a href="#evaluation">17 Evaluation</a>
+  </nav>
+  <strong style="margin-top:18px">🍽️ NUTRITION</strong>
+  <nav>
+    <a href="#quantity">18 Quantity</a>
+    <a href="#nutrition">19 Nutrition DB</a>
+    <a href="#nutritionjson">20 IFCT 2017</a>
+    <a href="#age">21 Age Groups</a>
+    <a href="#mealrules">22 Meal Rules</a>
+    <a href="#score">23 Scoring</a>
+    <a href="#why">24 Why?</a>
+    <a href="#recommend">25 Recommendations</a>
+    <a href="#whatif">26 What-If</a>
+  </nav>
+  <strong style="margin-top:18px">💻 TECH</strong>
+  <nav>
+    <a href="#history">27 History</a>
+    <a href="#csvdb">28 CSV Database</a>
+    <a href="#analytics">29 Analytics</a>
+    <a href="#dashboard">30 Dashboard</a>
+    <a href="#frontend">31 Frontend</a>
+    <a href="#backend">32 Backend API</a>
+    <a href="#endpoints">33 Endpoints</a>
+    <a href="#code">34 Code Structure</a>
+    <a href="#deploy">35 Deployment</a>
+  </nav>
+  <strong style="margin-top:18px">✅ FINAL</strong>
+  <nav>
+    <a href="#testing">36 Testing</a>
+    <a href="#edge">37 Edge Cases</a>
+    <a href="#results">38 Results</a>
+    <a href="#limits">39 Limitations</a>
+    <a href="#future">40 Future Scope</a>
+    <a href="#sources">41 Sources</a>
+    <a href="#handover">42 Handover</a>
+  </nav>
+</aside>
 
-  <div class="blueprint-container">
-    <h1>AI MealGuard: Complete Team Brief & Technical Log</h1>
-    <p>This document serves as the master blueprint for the AI MealGuard project. It contains the high-level
-      explanations for presentations, as well as the deep technical theory, algorithms, and flowcharts required
-      for comprehensive academic logbooks.</p>
+<!-- SPEAK BUTTON -->
+<button class="speak-btn" id="speakBtn" title="Read this section aloud (Indian English)">🔊</button>
 
-    <h2>1. Executive Summary (The One-Minute Explanation)</h2>
-    <div class="box" style="border-left: 4px solid #3b82f6;">
-      <p><em>(Every team member should memorize this core concept)</em></p>
-      <p><strong>AI MealGuard</strong> is an AI-based school meal monitoring system designed around <strong>SDG 2
-          — Zero Hunger</strong>. It uses computer vision to identify food components on a student's plate,
-        uses segmentation to locate individual food regions, estimates approximate quantities, calculates
-        nutritional values using a nutrition database, compares them against selected age-group requirements,
-        generates a meal-quality score, provides recommendations, and stores meal records for historical
-        analysis.</p>
-    </div>
+<main>
 
-    <h2>2. Problem Statement & SDG 2 Connection</h2>
-    <p>School meals are intended to provide adequate nutrition, but monitoring portions and nutritional quality
-      manually is difficult. AI MealGuard is designed to improve transparency and monitoring of school meal
-      distribution, ensuring that every child receives the required nutrients to support their developmental age.
-    </p>
-
-    <div class="diagram-container" style="padding: 10px; margin-bottom: 20px;">
-      <div class="mermaid">
-        graph LR
-        A[Midday Meal Scams] --> B{AI MealGuard}
-        B --> C[Audit & Verify Log]
-        B --> D[Ensure Full Portions]
-        C --> E(((SDG 2: Zero Hunger Reached)))
-        D --> E
-        style E fill:#2ea043,stroke:#fff,color:#fff
-      </div>
-    </div>
-
-    <h2>3. The System Flow (User Journey)</h2>
-    <p>This flowchart represents the human and data flow of how the system operates from a user's perspective.</p>
-    <div class="diagram-container">
-      <div class="mermaid">
-        graph TD
-        A[STUDENT] --> B[Student ID / QR <br />or Age Input]
-        B --> C[Load Student Profile]
-        C --> D[PLATE CAMERA]
-        D --> E[FOOD DETECTION]
-        E --> F[INSTANCE SEGMENTATION]
-        F --> G[QUANTITY ESTIMATION]
-        G --> H[NUTRITION DATABASE]
-        H --> I[AGE-GROUP REQUIREMENT]
-        I --> J[MEAL SCORE]
-        J --> K[EXPLANATION]
-        K --> L[RECOMMENDATION]
-        L --> M[SAVE MEAL]
-        M --> N[WEEKLY HISTORY]
-        N --> O[SCHOOL ANALYTICS]
-      </div>
-    </div>
-
-    <h2>4. Component Explanations (System Modules)</h2>
-    <p>This table breaks down the core modules of the AI MealGuard system and their technical responsibilities.</p>
-    <table>
-      <tr>
-        <th>Component</th>
-        <th>Technical Responsibility</th>
-      </tr>
-      <tr>
-        <td><strong>Camera</strong></td>
-        <td>Captures high-resolution frames of the plate using WebRTC/HTML5.</td>
-      </tr>
-      <tr>
-        <td><strong>YOLO Model</strong></td>
-        <td>Performs inference to detect bounding boxes of Indian food classes.</td>
-      </tr>
-      <tr>
-        <td><strong>Segmentation</strong></td>
-        <td>Generates pixel-perfect polygon masks to separate food from the plate background.</td>
-      </tr>
-      <tr>
-        <td><strong>Quantity Engine</strong></td>
-        <td>Uses OpenCV contour area combined with density metrics to estimate mass (grams).</td>
-      </tr>
-      <tr>
-        <td><strong>Nutrition DB</strong></td>
-        <td>Parses a local JSON dictionary mapping food classes to macro/micronutrient arrays.</td>
-      </tr>
-      <tr>
-        <td><strong>Age Requirements</strong></td>
-        <td>Retrieves the required daily intake baselines depending on the student's age group.</td>
-      </tr>
-      <tr>
-        <td><strong>Scoring Engine</strong></td>
-        <td>Computes a weighted scalar score (0-100) comparing detected nutrients vs baselines.</td>
-      </tr>
-      <tr>
-        <td><strong>Recommendation Engine</strong></td>
-        <td>Generates string-based actionable feedback (e.g., "Add more protein (Dal)").</td>
-      </tr>
-      <tr>
-        <td><strong>Database (csv_db.py)</strong></td>
-        <td>Appends meal records to a persistent CSV file simulating a relational database.</td>
-      </tr>
-      <tr>
-        <td><strong>Analytics Dashboard</strong></td>
-        <td>Aggregates CSV data to display weekly trends and school-wide performance metrics.</td>
-      </tr>
-    </table>
-
-    <h2>5. System Architecture Pipeline (Deep Technical Flow)</h2>
-    <p>Below is the deep technical flowchart showing exactly how an image is processed from the camera down to the
-      final Calorie output using our trained YOLOv8 architecture.</p>
-
-    <div class="diagram-container">
-      <div class="mermaid">
-        graph LR
-        A(("Camera Image<br />[Hardware - Webcam]")) --> B
-
-        subgraph yolo ["YOLOv8 Instance Segmentation Model [Deep Learning]"]
-        B["Feature Extractor<br />[CSPDarknet Neural Net]"] --> C["Detection Head<br />[Bounding Boxes]"]
-        B --> D["Segmentation Head<br />[Proto-Masks & Coefficients]"]
-        C --> E["Box Coordinates<br />[x, y, w, h]"]
-        D --> F["Food Polygon Masks<br />[Instance Segmentation]"]
-        end
-
-        F --> G
-
-        subgraph logic ["Weight & Nutritional Logic [Python/OpenCV]"]
-        G["Pixel Area Math<br />[OpenCV / Numpy]"] --> H["Density Multiplication<br />[Food Specific]"]
-        H --> I["Raw Weight in Grams"]
-        I --> J["age_requirements.json Lookup<br />[Backend JSON Parsing]"]
-        J --> K["Protein & Calories Extracted"]
-        end
-
-        K --> L(("Final Pass/Fail Score<br />[Frontend HTML/JS Display]"))
-
-        style A fill:#2ea043,stroke:#333,stroke-width:2px,color:#fff
-        style L fill:#2ea043,stroke:#333,stroke-width:2px,color:#fff
-        style yolo fill:#1f2937,stroke:#3b82f6,stroke-width:2px
-        style logic fill:#1f2937,stroke:#eab308,stroke-width:2px
-      </div>
-    </div>
-
-    <h2>6. Deep Technical Theory: Algorithms & Mathematics (For Logbook)</h2>
-    <p>This section provides the hardcore theoretical backing for the logbook, detailing how the model functions
-      internally and the mathematical formulas used for estimation.</p>
-
-    <h4>A. YOLOv8 Architecture Overview</h4>
-    <p>Our system uses <strong>YOLOv8-seg</strong>. Unlike older models, YOLOv8 is an anchor-free model that uses a
-      modified <strong>CSPDarknet53</strong> backbone to extract features at various scales. These features are
-      passed through a <strong>Path Aggregation Network (PANet)</strong> neck. The crucial innovation in the
-      segmentation head is that it outputs two things: a set of <em>prototype masks</em> (which span the whole
-      image) and a set of <em>mask coefficients</em> for each detected bounding box. The final polygon is
-      generated by linearly combining the prototypes using the coefficients and cropping it to the bounding box.
-    </p>
-
-    <h4>B. The Weight Estimation Algorithm (Pixel Area Math)</h4>
-    <p>To avoid requiring physical weighing scales, the system uses 2D spatial analysis to estimate food volume and
-      weight. The mathematical formula implemented in <code>ai_service.py</code> is:</p>
-    <div class="math-block">
-      Area_Fraction = Pixel_Area_of_Mask / Total_Image_Pixels<br>
-      Estimated_Weight (g) = Area_Fraction × MAX_IMAGE_WEIGHT_CAPACITY × Density_Factor
-    </div>
-    <p><strong>Variables:</strong></p>
-    <ul>
-      <li><code>Pixel_Area_of_Mask</code>: Derived directly from the contour of the YOLOv8 polygon using OpenCV
-        (<code>cv2.contourArea</code>).</li>
-      <li><code>MAX_IMAGE_WEIGHT_CAPACITY</code>: A calibrated constant (e.g., 1500g) representing the maximum
-        weight the camera view can hold if full.</li>
-      <li><code>Density_Factor</code>: A hardcoded multiplier based on the specific food (e.g., Dal is dense/heavy
-        = 1.2, Roti is light/flat = 0.5).</li>
-    </ul>
-
-    <h4>C. Evaluation Metrics Math</h4>
-    <p>The model's performance was evaluated using standard Object Detection metrics:</p>
-    <div class="math-block">
-      Precision = True_Positives / (True_Positives + False_Positives)<br>
-      Recall = True_Positives / (True_Positives + False_Negatives)<br>
-      IoU (Intersection over Union) = Area_of_Overlap / Area_of_Union<br>
-      mAP50 = Mean Average Precision across all classes at an IoU threshold of 0.50.
-    </div>
-
-    <h2>7. The "How": Codebase Blueprint & Routing</h2>
-    <p>This section explains how the files in our repository interact. It acts as the ultimate reference for the
-      team to understand the exact logic routing.</p>
-
-    <div class="diagram-container" style="padding: 10px; margin-bottom: 20px;">
-      <div class="mermaid">
-        graph TD
-        A["index.html<br>[Frontend Webcam UI]"] -- "Base64 Image POST" --> B("main.py<br>[FastAPI Backend
-        Server]")
-        B -- "Passes Image Data" --> C("ai_service.py<br>[YOLO Inference Engine]")
-        C -- "Returns Polygons & Weight" --> B
-        B -- "Logs Meal Data" --> D[("csv_db.py<br>[Historical Database]")]
-        B -- "Returns Pass/Fail JSON" --> A
-
-        style A fill:#1f2937,stroke:#3b82f6,color:#fff
-        style B fill:#1f2937,stroke:#eab308,color:#fff
-        style C fill:#1f2937,stroke:#2ea043,color:#fff
-        style D fill:#1f2937,stroke:#a855f7,color:#fff
-      </div>
-    </div>
-
-    <h3>Code Implementation Details:</h3>
-    <ul>
-      <li><strong><code>main.py</code> (Backend/API):</strong> The FastAPI backend connecting the frontend to the
-        AI engine. Uses <code>Jinja2Templates</code> to serve the HTML natively.</li>
-      <li><strong><code>ai_service.py</code> (YOLO Inference):</strong> Loads <code>best.pt</code>, extracts
-        segmentation masks, computes the Pixel Area Math for estimated quantity, and checks age requirements via
-        <code>data/age_requirements.json</code>.
-      </li>
-      <li><strong><code>frontend/index.html</code> (Interface & Drawing):</strong> Captures the webcam, POSTs to
-        the API, and uses <code>drawDetections()</code> with HTML5 Canvas (<code>ctx.moveTo</code>,
-        <code>ctx.lineTo</code>) to render polygon masks dynamically.
-      </li>
-      <li><strong><code>csv_db.py</code> (Database):</strong> Logs every meal's data (Date, Age Group, Score,
-        Pass/Fail, weights) into <code>meal_history.csv</code> to prevent scams and power the analytics
-        dashboard.</li>
-      <li><strong>Student Identification:</strong> Identification is performed using Student ID/QR or age-only
-        mode. <em>Note: Face recognition is an optional future/experimental feature and is disabled in the
-          default competition build.</em></li>
-    </ul>
-
-    <h2>8. What AI Actually Does (Vision vs. Math)</h2>
-    <div class="box">
-      <p><strong>Crucial Distinction:</strong> The AI does NOT magically know nutrition. It handles the vision,
-        and standard programming handles the math. This makes our project technically defensible.</p>
-      <pre style="font-size: 1rem; line-height: 1.8;">
-AI (Vision)
- ↓
-"Dal detected"
-"~60 g estimated"
- ↓
-Nutrition database (Math/Logic)
- ↓
-Dal's nutrient values
- ↓
-60 g × nutrient values
- ↓
-Estimated nutrition
-        </pre>
-    </div>
-
-    <h2>9. What is Our Innovation?</h2>
-    <p>Our contribution to solving this problem consists of:</p>
-    <ol style="list-style-type: decimal; margin-left: 20px;">
-      <li>Food-specific dataset curation and manual labeling using polygons.</li>
-      <li>Custom YOLOv8 food instance segmentation model (not just bounding boxes).</li>
-      <li>School-meal recognition workflow explicitly tied to SDG 2.</li>
-      <li>Visual quantity estimation approach using Pixel Area Density scaling.</li>
-      <li>Age-aware nutritional assessment (A 15-year-old is graded differently than a 7-year-old).</li>
-      <li>Dynamic meal scoring system (0-100 scale).</li>
-      <li>Explainable nutritional recommendations based on macro deficits.</li>
-      <li>Anti-Scam historical meal tracking database.</li>
-      <li>School-level analytics dashboard for administrative oversight.</li>
-      <li>A complete, working end-to-end prototype deployed via FastAPI.</li>
-    </ol>
-
-    <h2>10. Limitations & Future Scope</h2>
-    <div class="box">
-      <h3>Current Limitations</h3>
-      <ul style="list-style-type: disc; margin-left: 20px; color:#f87171;">
-        <li>Food quantity is <strong>estimated</strong> based on 2D area, not measured by a physical 3D weighing
-          scale.</li>
-        <li>Similar-looking foods (e.g., various brown curries) may sometimes be confused.</li>
-        <li>Poor lighting can significantly reduce detection quality.</li>
-        <li>Occluded/overlapping food can be difficult to segment accurately.</li>
-        <li>Nutrition values depend entirely on the provided JSON database averages.</li>
-        <li>Portion estimation depends on a consistent camera setup and distance calibration.</li>
-        <li>The system is a monitoring/screening prototype, not a laboratory food-safety test.</li>
-        <li>Results should be reviewed by humans when AI confidence is low.</li>
-      </ul>
-
-      <h3 style="margin-top: 30px;">Future Scope</h3>
-      <div class="diagram-container text-center" style="padding: 10px; margin-bottom: 20px; border:none;">
-        <pre style="display:inline-block; text-align:left; color:#60a5fa; line-height: 2;">
-Future Version
-       ↓
-Better quantity calibration (Depth sensing cameras)
-       ↓
-More Indian foods (Expanded dataset)
-       ↓
-Mobile/tablet application deployment
-       ↓
-Automated school reporting to Government portals
-       ↓
-Advanced recommendation engine with local food sourcing
-       ↓
-Optional secure face identification for seamless student tracking
-            </pre>
-      </div>
-    </div>
-
-    <h2>11. Testing & Validation</h2>
-    <p>The system was rigorously tested across functional requirements and edge cases. Below is the testing evidence
-      required for the logbook.</p>
-    <table>
-      <tr>
-        <th>Test</th>
-        <th>Input</th>
-        <th>Expected</th>
-        <th>Result</th>
-      </tr>
-      <tr>
-        <td>Student ID</td>
-        <td>STU-1024</td>
-        <td>Correct profile loaded</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Plate detection</td>
-        <td>Valid plate image</td>
-        <td>Plate detected</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Rice detection</td>
-        <td>Rice on plate</td>
-        <td>Rice identified & segmented</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Multiple foods</td>
-        <td>Rice + Dal + Veg</td>
-        <td>All detected</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Low confidence</td>
-        <td>Unusual food item</td>
-        <td>Warning generated</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Nutrition</td>
-        <td>Known food quantity</td>
-        <td>Correct calculation</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>History</td>
-        <td>Completed meal</td>
-        <td>Record saved to CSV</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Camera</td>
-        <td>Webcam feed</td>
-        <td>Image captured successfully</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-      <tr>
-        <td>Recommendation</td>
-        <td>Low protein meal</td>
-        <td>Recommendation shown</td>
-        <td><strong>PASS</strong></td>
-      </tr>
-    </table>
-
-    <div class="box">
-      <h3>Edge Cases Handled & Tested</h3>
-      <p>✓ Good lighting</p>
-      <p>✓ Poor lighting</p>
-      <p>✓ Small food quantity</p>
-      <p>✓ Large food quantity</p>
-      <p>✓ Multiple foods</p>
-      <p>✓ Overlapping foods</p>
-      <p>✓ Unknown food</p>
-      <p>✓ Empty plate</p>
-      <p>✓ Incorrect Student ID</p>
-      <p>✓ Camera unavailable</p>
-    </div>
-
-    <h2>12. Model Evaluation Metrics & Dataset</h2>
-    <p>The model was trained on Kaggle (NVIDIA T4 GPUs) for 100 epochs using a manually annotated version of the
-      IIIT-Delhi Indian Thali Dataset. During Phase 4, the team uncovered a critical "Label Mismatch" bug (the
-      dataset had 50 classes but the YAML had 41). The parsing scripts were rewritten to align the classes. Below
-      are the final evaluation outputs from the model's validation set:</p>
-    <div class="metric-box">
-      <div class="metric-item">
-        <div class="metric-val">91.2%</div>
-        <div class="metric-label">Precision</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">89.5%</div>
-        <div class="metric-label">Recall</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">90.3%</div>
-        <div class="metric-label">F1-Score</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">92.0%</div>
-        <div class="metric-label">Accuracy</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">92.4%</div>
-        <div class="metric-label">mAP50</div>
-      </div>
-    </div>
-
-    <div class="img-grid">
-      <div class="img-card">
-        <img src="backend/results/results.png" alt="Training Results">
-        <div class="img-caption">Training Loss and Validation Metrics</div>
-      </div>
-      <div class="img-card">
-        <img src="backend/results/confusion_matrix.png" alt="Confusion Matrix">
-        <div class="img-caption">Confusion Matrix</div>
-      </div>
-    </div>
-
-    <h2>13. Deep Technical Details (Dataset & Backend Architecture)</h2>
-
-    <div class="box">
-      <h3>A. Dataset Curation & Preprocessing</h3>
-      <p>The foundation of this project is a heavily modified version of the <strong>IIIT-Delhi Indian Thali
-          Dataset</strong>. While the original dataset provided bounding boxes, instance segmentation requires
-        polygon masks. Our team undertook the massive effort to manually annotate or refine polygons for Indian
-        food classes. During Phase 4 of training, we discovered a critical label mismatch: the directory
-        contained 50 classes, but our <code>data.yaml</code> was strictly mapped to 41 classes. We wrote custom
-        Python parsing scripts to align the label integers in the text files, avoiding indexing errors during
-        PyTorch dataloading.</p>
-
-      <h3>B. Backend Architecture (FastAPI Asynchronous Routing)</h3>
-      <p>The backend is built on <strong>FastAPI</strong> using Uvicorn as the ASGI server. We chose FastAPI over
-        Flask/Django for two reasons:</p>
-      <ul style="list-style-type: disc; margin-left: 20px;">
-        <li><strong>Asynchronous execution:</strong> YOLO inference is heavily blocking. By using
-          <code>async def</code> endpoints, the server can handle multiple plate requests concurrently without
-          freezing.
-        </li>
-        <li><strong>Pydantic Models:</strong> All Base64 images and nutritional data are strictly validated
-          using Pydantic, ensuring type safety before it ever hits the YOLO engine.</li>
-      </ul>
-
-      <h3>C. Nutritional Data Structures (age_requirements.json)</h3>
-      <p>The logic engine relies on a strict JSON schema to evaluate meals. Instead of hardcoding logic, we
-        structured <code>age_requirements.json</code> to dynamically adjust thresholds. For example, a 7-9 year
-        old requires 450 Calories and 12g of Protein for a midday meal, whereas a 13-15 year old requires 700
-        Calories and 20g of Protein. The logic engine parses the student's age, dynamically loads these baseline
-        arrays, and mathematically compares them against the YOLO estimated weights to generate the 0-100 score.
-      </p>
-    </div>
-
-    <h2>14. Application Showcase (Testing Evidence)</h2>
-    <div class="img-grid">
-      <div class="img-card"><img src="backend/results/startingpage.png" alt="Starting Page">
-        <div class="img-caption">Landing Page / Initial Setup</div>
-      </div>
-      <div class="img-card"><img src="backend/results/register_student.png" alt="Register Student">
-        <div class="img-caption">Student Registration (ID/QR)</div>
-      </div>
-      <div class="img-card"><img src="backend/results/welcome_b.png" alt="Welcome Back">
-        <div class="img-caption">Student Verification</div>
-      </div>
-      <div class="img-card"><img src="backend/results/scanning.png" alt="Scanning Plate">
-        <div class="img-caption">Live Plate Scanning</div>
-      </div>
-      <div class="img-card"><img src="backend/results/final_result.png" alt="Final Result">
-        <div class="img-caption">Nutritional Breakdown & Final Score</div>
-      </div>
-      <div class="img-card"><img src="backend/results/weekly history.png" alt="History Log">
-        <div class="img-caption">Historical Meal Log</div>
-      </div>
-      <div class="img-card"><img src="backend/results/statistics.png" alt="Statistics Dashboard">
-        <div class="img-caption">Analytics Dashboard</div>
-      </div>
-    </div>
-
+<!-- ═══════════════════════ 01 OVERVIEW ═══════════════════════ -->
+<section class="hero" id="overview">
+  <label>PROJECT HANDOVER • SDG 2 • AI + COMPUTER VISION</label>
+  <h1>AI MealGuard</h1>
+  <h2>AI-Powered Smart Monitoring for Nutritious School Meals</h2>
+  <p>This is the <b>complete team documentation</b> for the AI MealGuard project. It explains <b>every single feature, file, formula, and decision</b> in a way that any team member can understand without external help. This document covers the problem, solution, AI pipeline (YOLOv8 instance segmentation), facial recognition, nutrition database, scoring formula, backend API, deployment, and handover.</p>
+  <div class="actions">
+    <button class="primary" onclick="location.hash='flow'">Explore the System →</button>
+    <button class="secondary" onclick="window.print()">Print / Export PDF</button>
   </div>
+  <div class="stats">
+    <div><b>50</b><strong>Food Classes</strong><small>YOLOv8-seg model</small></div>
+    <div><b>9</b><strong>API Endpoints</strong><small>FastAPI backend</small></div>
+    <div><b>4</b><strong>Age Groups</strong><small>ICMR-NIN benchmarks</small></div>
+    <div><b>42</b><strong>Doc Sections</strong><small>This handover</small></div>
+  </div>
+</section>
 
-  <button class="tts-button" id="speakBtn" title="Speak Document">🔊</button>
+<!-- ═══════════════════════ 02 PROBLEM ═══════════════════════ -->
+<section id="problem">
+  <label>02 • PROBLEM</label>
+  <h2>Problem Statement</h2>
+  <p>India's Mid-Day Meal Scheme (PM POSHAN) serves over 12 crore children daily. However, monitoring the <b>nutritional quality</b> of each plate manually is nearly impossible at this scale. Teachers and staff do not have the tools to verify whether each child's plate meets the recommended dietary standards for their age group.</p>
+  <div class="mermaid">
+    flowchart LR
+    A["🏫 School Kitchen"] --> B["🍽️ Plate Served"]
+    B --> C["👁️ Manual Check?"]
+    C --> D["❌ No Tools"]
+    C --> E["❌ No Standard"]
+    C --> F["❌ No Record"]
+    D --> G["❓ Unverified Nutrition"]
+    E --> G
+    F --> G
+  </div>
+  <div class="grid2">
+    <article>
+      <h3>🔴 The Challenges</h3>
+      <ul>
+        <li>Manual observation is <b>time-consuming</b> and inconsistent</li>
+        <li>Portion sizes are <b>difficult to estimate</b> visually</li>
+        <li>Nutrition calculations <b>require separate expertise</b></li>
+        <li>There is <b>no automated record</b> of what was served</li>
+        <li>Historical trends are <b>impossible to maintain</b> manually</li>
+        <li>Different age groups need <b>different nutritional targets</b></li>
+      </ul>
+    </article>
+    <article>
+      <h3>🟢 Our Response</h3>
+      <ul>
+        <li>Camera-based meal capture (file upload or webcam)</li>
+        <li>AI-powered food detection and segmentation</li>
+        <li>Automatic quantity estimation from pixel area</li>
+        <li>Nutrition lookup against a verified database</li>
+        <li>Age-aware comparison with ICMR-NIN benchmarks</li>
+        <li>Score + explanation + recommendations</li>
+        <li>Full meal history and analytics dashboard</li>
+      </ul>
+    </article>
+  </div>
+  <div class="notice warn"><b>Important:</b> This is a monitoring and screening prototype, not a laboratory food-safety test. We never claim to physically weigh food.</div>
+</section>
 
-  <script>
-    const speakBtn = document.getElementById('speakBtn');
-    let isSpeaking = false;
+<!-- ═══════════════════════ 03 SDG 2 ═══════════════════════ -->
+<section id="sdg">
+  <label>03 • IMPACT</label>
+  <h2>SDG 2 — Zero Hunger</h2>
+  <p>AI MealGuard directly contributes to <b>UN Sustainable Development Goal 2: Zero Hunger</b> by enabling schools to monitor whether meals meet nutritional standards. Better monitoring → better accountability → better nutrition → healthier children.</p>
+  <div class="mermaid">
+    flowchart LR
+    A["🍽️ School Meal"] --> B["📸 Camera Capture"]
+    B --> C["🤖 AI Analysis"]
+    C --> D["📊 Nutrition Score"]
+    D --> E["📋 Monitoring"]
+    E --> F["🔄 Meal Improvement"]
+    F --> G["🌍 SDG 2: Zero Hunger"]
+  </div>
+  <div class="grid3">
+    <article><h3>🎯 Target 2.1</h3><p>End hunger and ensure access to safe, nutritious food for all children.</p></article>
+    <article><h3>🎯 Target 2.2</h3><p>End all forms of malnutrition, especially among school-age children.</p></article>
+    <article><h3>📊 Indicator</h3><p>Meal quality scores tracked over time to measure improvement.</p></article>
+  </div>
+</section>
 
-    speakBtn.addEventListener('click', () => {
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        speakBtn.textContent = '🔊';
-        isSpeaking = false;
-        return;
+<!-- ═══════════════════════ 04 SOLUTION ═══════════════════════ -->
+<section id="solution">
+  <label>04 • SOLUTION</label>
+  <h2>Complete Solution Pipeline</h2>
+  <p>Our system follows a precise 8-step pipeline from student identification to actionable recommendations:</p>
+  <div class="mermaid">
+    flowchart LR
+    A["👤 Student ID"] --> B["📸 Plate Capture"]
+    B --> C["🤖 YOLOv8 Segmentation"]
+    C --> D["⚖️ Quantity Estimation"]
+    D --> E["🥗 Nutrition Lookup"]
+    E --> F["📊 Age Comparison"]
+    F --> G["🏆 Score"]
+    G --> H["💡 Recommendations"]
+  </div>
+  <div class="flowrow">
+    <span>Identify<br>Student / Age</span>→<span>Capture<br>Plate Image</span>→<span>YOLOv8<br>Segmentation</span>→<span>Pixel Area<br>→ Grams</span>→<span>Nutrition<br>Database</span>→<span>Age<br>Benchmark</span>→<span>Score<br>0-100</span>→<span>Explain<br>& Recommend</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 05 INNOVATION ═══════════════════════ -->
+<section id="innovation">
+  <label>05 • CONTRIBUTION</label>
+  <h2>What We Actually Built</h2>
+  <p>This is not just a simple image classifier. We built a complete end-to-end system with 8 core innovations:</p>
+  <div class="cards">
+    <article><b>01</b><h3>50-Class Indian Food Dataset</h3><p>Trained on Indian Thali Dataset (ITD) with 861MB of real school meal images. Classes include rice, dal, sambar, roti, rajma, and 45 more.</p></article>
+    <article><b>02</b><h3>Instance Segmentation</h3><p>Not just bounding boxes — we extract pixel-perfect masks to calculate the exact area each food item occupies on the plate.</p></article>
+    <article><b>03</b><h3>Quantity from Pixels</h3><p>We convert segmentation mask pixel area into approximate grams using density factors and a calibrated reference weight of 4500g.</p></article>
+    <article><b>04</b><h3>ICMR-NIN Benchmarks</h3><p>Age-specific nutritional requirements based on Indian Council of Medical Research data, with daily and per-meal targets.</p></article>
+    <article><b>05</b><h3>Facial Recognition</h3><p>Optional student identification using the face_recognition library with 128-dimensional face encodings stored in CSV.</p></article>
+    <article><b>06</b><h3>Explainable Scoring</h3><p>Every score comes with a "WHY" — showing exactly which nutrients fell short and what to add to improve the meal.</p></article>
+    <article><b>07</b><h3>What-If Simulator</h3><p>Interactive tool letting users adjust food quantities and instantly see how the score changes, using the real backend formula.</p></article>
+    <article><b>08</b><h3>Full Stack Prototype</h3><p>Working frontend (HTML/Tailwind/GSAP) + backend (FastAPI) + AI (YOLOv8) + database (CSV) + deployment (Docker) — all connected.</p></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 06 USERS ═══════════════════════ -->
+<section id="roles">
+  <label>06 • USERS</label>
+  <h2>Users & Team Roles</h2>
+  <div class="mermaid">
+    flowchart TD
+    A["AI MealGuard System"] --> B["👨‍🎓 Students"]
+    A --> C["👩‍🏫 Teachers / Staff"]
+    A --> D["🏫 School Administrators"]
+    A --> E["👨‍💻 Project Team"]
+    B --> F["Receive meal scores"]
+    C --> G["Monitor daily meals"]
+    D --> H["View analytics dashboard"]
+    E --> I["Maintain and improve system"]
+  </div>
+  <div class="notice">Use fake/demo student IDs and anonymized school data in the competition build. Never use real student personal data.</div>
+</section>
+
+<!-- ═══════════════════════ 07 USER FLOW ═══════════════════════ -->
+<section id="flow">
+  <label>07 • USER FLOW</label>
+  <h2>Complete User Journey (Step by Step)</h2>
+  <p>This flowchart shows every single screen and decision point the user encounters from start to finish:</p>
+  <div class="mermaid">
+    flowchart TD
+    START["🏠 Home Screen"] --> TAB{"Which Tab?"}
+    TAB -->|Scan Meal| SID["Enter Student ID"]
+    TAB -->|Register| REG["Enter Name + Age"]
+    SID --> FACE{"Use Face Login?"}
+    FACE -->|Yes| WEBCAM1["📷 Open Webcam"]
+    WEBCAM1 --> POLL1["Auto-poll /api/students/recognize"]
+    POLL1 --> MATCH{"Face Match?"}
+    MATCH -->|Yes| AUTOFILL["Auto-fill Student ID"]
+    MATCH -->|No| MANUAL["Manual ID Entry"]
+    FACE -->|No| MANUAL
+    AUTOFILL --> SCAN["📸 Scan Screen"]
+    MANUAL --> SCAN
+    REG --> REGFACE{"Add Face?"}
+    REGFACE -->|Yes| WEBCAM2["📷 Capture Face"]
+    WEBCAM2 --> CHECKFACE["POST /api/students/check_face"]
+    CHECKFACE --> SAVE_REG["POST /api/students/register"]
+    REGFACE -->|No| SAVE_REG
+    SAVE_REG --> SID
+    SCAN --> UPLOAD{"Image Source?"}
+    UPLOAD -->|File| FILEINPUT["Select Image File"]
+    UPLOAD -->|Webcam| WEBCAM3["📷 Snap Meal Photo"]
+    FILEINPUT --> ANALYZE["POST /api/analyze"]
+    WEBCAM3 --> ANALYZE
+    ANALYZE --> AI["🤖 YOLOv8 Inference"]
+    AI --> DETECT["Extract Detections + Masks"]
+    DETECT --> WEIGHT["Calculate Estimated Weight"]
+    WEIGHT --> NUTRI["Lookup Nutrition per 100g"]
+    NUTRI --> AGESCORE["Compare vs Age Benchmark"]
+    AGESCORE --> SCORING["Calculate Final Score"]
+    SCORING --> RESULT["📊 Result Screen"]
+    RESULT --> WHY["WHY this score?"]
+    RESULT --> RECS["💡 Recommendations"]
+    RESULT --> SAVE["💾 Save to CSV History"]
+    SAVE --> HISTORY["📋 History Screen"]
+    HISTORY --> DASHBOARD["📈 Dashboard"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 08 IDENTIFICATION ═══════════════════════ -->
+<section id="identification">
+  <label>08 • IDENTIFICATION</label>
+  <h2>Student Identification Methods</h2>
+  <p>The system supports <b>3 different ways</b> to identify a student. This determines which age-group benchmark to use for scoring:</p>
+  <div class="mermaid">
+    flowchart LR
+    A["Student Arrives"] --> B{"Identification Method"}
+    B -->|Method 1| C["Manual Student ID"]
+    B -->|Method 2| D["Age-Only Guest Mode"]
+    B -->|Method 3| E["Facial Recognition"]
+    C --> F["Lookup in students.csv"]
+    D --> G["Use entered age directly"]
+    E --> H["Match 128D face encoding"]
+    F --> I["Get name + age + age_group"]
+    G --> I
+    H --> I
+    I --> J["Proceed to Meal Scan"]
+  </div>
+  <div class="grid3">
+    <article><small>DEFAULT</small><h3>Student ID</h3><p>Enter a registered ID like <code>S482</code>. Backend calls <code>get_student_by_id()</code> to find the student in <code>students.csv</code>.</p></article>
+    <article><small>GUEST</small><h3>Age Only</h3><p>Enter just the age (e.g. 12). No student record needed. The system uses <code>get_age_group(12)</code> → <code>"11-14"</code>.</p></article>
+    <article><small>BIOMETRIC</small><h3>Face Recognition</h3><p>Webcam auto-captures face, sends to <code>/api/students/recognize</code>, matches against stored 128D encodings.</p></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 09 FACE RECOGNITION ═══════════════════════ -->
+<section id="facerecog">
+  <label>09 • FACIAL RECOGNITION</label>
+  <h2>How Facial Recognition Works</h2>
+  <p>Our system uses the <code>face_recognition</code> Python library (built on dlib's deep learning model) to create and match 128-dimensional face embeddings. Here is exactly how it works:</p>
+  <div class="mermaid">
+    flowchart TD
+    A["📷 Webcam captures frame"] --> B["Base64-encode image"]
+    B --> C["Send to /api/students/check_face or /recognize"]
+    C --> D["decode_base64_image: PIL → RGB → uint8 → contiguous numpy array"]
+    D --> E["face_recognition.face_locations: Find face bounding boxes"]
+    E --> F{"Face Found?"}
+    F -->|No| G["Return face_detected: false"]
+    F -->|Yes| H["face_recognition.face_encodings: Extract 128D vector"]
+    H --> I["Registration: Store encoding as JSON in students.csv"]
+    H --> J["Login: Compare with ALL stored encodings"]
+    J --> K["face_recognition.face_distance: Euclidean distance"]
+    K --> L{"Best distance ≤ 0.6?"}
+    L -->|Yes| M["✅ Match found — return student"]
+    L -->|No| N["❌ No match"]
+  </div>
+  <pre>
+# face_utils.py — Key Functions
+
+def get_face_encoding(base64_img):
+    img = decode_base64_image(base64_img)         # PIL → RGB → numpy
+    face_locations = face_recognition.face_locations(img)
+    if not face_locations: return None
+    encodings = face_recognition.face_encodings(img, face_locations)
+    return encodings[0].tolist()                   # 128-dimensional list
+
+def find_matching_student(unknown_encoding, students, tolerance=0.6):
+    known_encodings = [np.array(s["face_encoding"]) for s in students if s.get("face_encoding")]
+    distances = face_recognition.face_distance(known_encodings, np.array(unknown_encoding))
+    best = np.argmin(distances)
+    if distances[best] <= tolerance: return student_ids[best]
+    return None</pre>
+  <div class="notice"><b>Auto-Capture Flow:</b> The frontend polls the webcam every 1 second. Each frame is sent to <code>/api/students/check_face</code> (registration) or <code>/api/students/recognize</code> (login). When a match is found, the modal auto-closes and the student ID is auto-filled.</div>
+</section>
+
+<!-- ═══════════════════════ 10 COMPUTER VISION ═══════════════════════ -->
+<section id="cv">
+  <label>10 • AI CONCEPT</label>
+  <h2>Computer Vision Explained</h2>
+  <p>Computer Vision is a branch of AI that enables machines to "see" and extract useful information from images. Our system uses it to answer 3 questions about every plate:</p>
+  <div class="mermaid">
+    flowchart LR
+    A["📸 Meal Image"] --> B["🤖 Computer Vision"]
+    B --> C["❓ What food is this?"]
+    B --> D["❓ Where is it on the plate?"]
+    B --> E["❓ How much area does it cover?"]
+    C --> F["Food Class + Confidence"]
+    D --> G["Bounding Box + Polygon Mask"]
+    E --> H["Pixel Area → Estimated Weight"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 11 YOLO ═══════════════════════ -->
+<section id="yolo">
+  <label>11 • MODEL</label>
+  <h2>Why YOLOv8 Instance Segmentation?</h2>
+  <p>We use <b>YOLOv8-seg</b> (stored as <code>best.pt</code>, ~54MB). YOLO stands for "You Only Look Once" — it processes the entire image in a single pass, making it fast enough for real-time use.</p>
+  <div class="mermaid">
+    flowchart TD
+    A["Image Input 640×640"] --> B["YOLOv8 Backbone CNN"]
+    B --> C["Feature Pyramid Network"]
+    C --> D["Detection Head"]
+    C --> E["Segmentation Head"]
+    D --> F["Bounding Boxes + Class + Confidence"]
+    E --> G["Binary Masks per instance"]
+    F --> H["We know WHAT food and WHERE"]
+    G --> I["We know WHICH PIXELS belong to each food"]
+    H --> J["Combined Output"]
+    I --> J
+  </div>
+  <div class="grid2">
+    <article>
+      <h3>Object Detection (Bounding Boxes)</h3>
+      <p>Answers: <i>What is it? Where is it roughly?</i><br>Draws a rectangle around each food. Good for counting items (e.g. 2 rotis), but bad for measuring liquid curries or irregular shapes.</p>
+    </article>
+    <article>
+      <h3>Instance Segmentation (Masks)</h3>
+      <p>Answers: <i>Which exact pixels belong to this specific item?</i><br>Extracts an <code>[N, H, W]</code> mask tensor. We sum non-zero pixels to calculate the total area covered by each food item.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 12 SEGMENTATION ═══════════════════════ -->
+<section id="segmentation">
+  <label>12 • VISION</label>
+  <h2>Detection vs Segmentation — Visual Difference</h2>
+  <div class="mermaid">
+    flowchart LR
+    A["📸 Meal Image"] --> B["YOLOv8-seg"]
+    B --> C["📦 Bounding Boxes"]
+    B --> D["🎨 Segmentation Masks"]
+    C --> E["Food Class + Location"]
+    D --> F["Exact Food Region"]
+    F --> G["Sum Non-Zero Pixels = Pixel Area"]
+    G --> H["Area Fraction = pixel_area / total_pixels"]
+    H --> I["Weight = Area_Fraction × 4500g × Density"]
+  </div>
+  <div class="notice"><b>Why masks matter:</b> A bounding box around a bowl of sambar includes the empty space around the bowl. A segmentation mask only includes the actual sambar pixels — giving us an accurate area measurement.</div>
+</section>
+
+<!-- ═══════════════════════ 13 AI PIPELINE ═══════════════════════ -->
+<section id="pipeline">
+  <label>13 • PIPELINE</label>
+  <h2>Complete AI Pipeline (What Happens Inside)</h2>
+  <p>When you click "Capture & Analyze", here is exactly what happens in the backend, step by step:</p>
+  <div class="mermaid">
+    flowchart TD
+    A["📸 Base64 Image from Frontend"] --> B["Decode Base64 → Save as temp .jpg"]
+    B --> C["model = YOLO best.pt"]
+    C --> D["results = model temp.jpg"]
+    D --> E["Extract result.boxes + result.masks"]
+    E --> F["For each detection:"]
+    F --> G["Get class_id → raw_name from model"]
+    G --> H["Fix label: UNSCRAMBLE dict"]
+    H --> I["true_food_name = corrected label"]
+    I --> J["Get bounding box: x1,y1,x2,y2"]
+    J --> K["Get mask: binary pixel array"]
+    K --> L["pixel_area = mask.sum"]
+    L --> M["total_pixels = H × W"]
+    M --> N["area_fraction = pixel_area / total_pixels"]
+    N --> O["density = get_density_factor true_food_name"]
+    O --> P["estimated_weight = area_fraction × 4500.0 × density"]
+    P --> Q["Simplify polygon to ~30 points"]
+    Q --> R["Build detection object"]
+    R --> S["Aggregate quantities dict"]
+    S --> T["Return detections + quantities"]
+  </div>
+  <div class="notice warn"><b>Key Constants:</b> <code>MAX_IMAGE_WEIGHT_G = 4500.0</code> — This is the theoretical maximum weight if the entire camera frame was filled with density-1.0 food. It was set to 4500g to account for overhead cameras where the plate only occupies ~15-20% of the frame.</div>
+</section>
+
+<!-- ═══════════════════════ 14 DATASET (50 CLASSES) ═══════════════════════ -->
+<section id="dataset">
+  <label>14 • 50 CLASSES</label>
+  <h2>The 50-Class Food Dataset</h2>
+  <p>Our YOLO model was trained to recognize <b>50 distinct Indian school meal food classes</b>. During development, we discovered a label mismatch between the ground truth JSON and the YOLO class indices. We fixed this with the <code>UNSCRAMBLE</code> dictionary.</p>
+  <div class="mermaid">
+    flowchart LR
+    A["YOLO predicts class_id=4"] --> B["raw_name = WRONG_NAMES 4"]
+    B --> C["'cabbage-fry'"]
+    C --> D["UNSCRAMBLE lookup"]
+    D --> E["true_name = CORRECT_NAMES 4"]
+    E --> F["'cabbage-pakodi'"]
+    F --> G["Use corrected name for nutrition lookup"]
+  </div>
+  <table>
+    <tr><th>#</th><th>Food Class</th><th>#</th><th>Food Class</th><th>#</th><th>Food Class</th></tr>
+    <tr><td>1</td><td>aloo-dry-fry</td><td>18</td><td>sambar</td><td>35</td><td>aloo-fry</td></tr>
+    <tr><td>2</td><td>avakaya-muddha-papu-rice</td><td>19</td><td>tomato-rasam</td><td>36</td><td>banana</td></tr>
+    <tr><td>3</td><td>baby-corn-capsicum-dry</td><td>20</td><td>vankaya-ali-karam</td><td>37</td><td>mix-fruit</td></tr>
+    <tr><td>4</td><td>cabbage-pakodi</td><td>21</td><td>veg-biriyani</td><td>38</td><td>non-spicy-baby-corn</td></tr>
+    <tr><td>5</td><td>cabbage-fry</td><td>22</td><td>aloo-curry</td><td>39</td><td>sweet</td></tr>
+    <tr><td>6</td><td>capsicum-paneer-curry</td><td>23</td><td>curd</td><td>40</td><td>tomato-rice</td></tr>
+    <tr><td>7</td><td>chakar-pongal</td><td>24</td><td>dal</td><td>41</td><td>fried-papad-rings</td></tr>
+    <tr><td>8</td><td>chole-masala</td><td>25</td><td>fresh-chutney</td><td>42</td><td>gravy</td></tr>
+    <tr><td>9</td><td>cluster-beans-curry</td><td>26</td><td>salad</td><td>43</td><td>ivy-gourd-fry</td></tr>
+    <tr><td>10</td><td>cucumber-raitha</td><td>27</td><td>moong-beans-curry</td><td>44</td><td>mango-pickle</td></tr>
+    <tr><td>11</td><td>gobi-masala-curry</td><td>28</td><td>khichdi</td><td>45</td><td>papad-chat</td></tr>
+    <tr><td>12</td><td>gutti-vankaya-curry</td><td>29</td><td>lemon-rice</td><td>46</td><td>pepper-rasam</td></tr>
+    <tr><td>13</td><td>jeera-rice</td><td>30</td><td>roti</td><td>47</td><td>pineapple</td></tr>
+    <tr><td>14</td><td>mixed-curry</td><td>31</td><td>non-spicy-bottle-gourd</td><td>48</td><td>corn-fry</td></tr>
+    <tr><td>15</td><td>muskmelon</td><td>32</td><td>papad</td><td>49</td><td>paneer-curry</td></tr>
+    <tr><td>16</td><td>rajma</td><td>33</td><td>plain-rice</td><td>50</td><td>semiya</td></tr>
+    <tr><td>17</td><td>rasgulla</td><td>34</td><td>watermelon</td><td></td><td></td></tr>
+  </table>
+  <div class="grid2">
+    <article>
+      <h3>Generic Category Mapping</h3>
+      <p>All 50 classes are dynamically mapped to <b>8 generic nutrition categories</b> using keyword matching in <code>get_category_for_food()</code>:</p>
+      <ul>
+        <li><b>rice</b> ← rice, biriyani, khichdi, pongal, semiya</li>
+        <li><b>roti</b> ← roti, papad</li>
+        <li><b>dal</b> ← dal, rajma, sambar, rasam, chole, beans</li>
+        <li><b>curd</b> ← curd, raitha</li>
+        <li><b>salad</b> ← salad, chutney, pickle</li>
+        <li><b>fruit</b> ← watermelon, melon, banana, fruit, pineapple</li>
+        <li><b>potato</b> ← aloo, potato</li>
+        <li><b>vegetable</b> ← everything else (default)</li>
+      </ul>
+    </article>
+    <article>
+      <h3>Why 50 Classes?</h3>
+      <p>Indian school meals have enormous variety across regions. Our 50 classes cover:</p>
+      <ul>
+        <li>South Indian (sambar, rasam, pongal, avakaya)</li>
+        <li>North Indian (chole, rajma, roti, dal)</li>
+        <li>Fruits (banana, watermelon, muskmelon, pineapple)</li>
+        <li>Side items (papad, pickle, chutney, salad)</li>
+        <li>Sweets (rasgulla, sweet)</li>
+        <li>Special items (paneer curry, khichdi, biriyani)</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 15 TRAINING DATA ═══════════════════════ -->
+<section id="trainingdata">
+  <label>15 • TRAINING DATA</label>
+  <h2>Training Datasets Used</h2>
+  <p>We used two major datasets stored in <code>backend/ai/</code>:</p>
+  <div class="grid2">
+    <article>
+      <h3>📁 ITD (Indian Thali Dataset)</h3>
+      <p><b>Size:</b> 861 MB (compressed .tar.gz)<br><b>Source:</b> Academic research dataset<br><b>Contents:</b> Thousands of annotated Indian thali images with segmentation masks for 50 food classes.<br><b>Use:</b> Primary training dataset for our YOLOv8-seg model.</p>
+    </article>
+    <article>
+      <h3>📁 WED (Web-scraped Extended Dataset)</h3>
+      <p><b>Size:</b> 159 MB (compressed .tar.gz)<br><b>Source:</b> Web-scraped and manually verified<br><b>Contents:</b> Supplementary food images for improving model robustness.<br><b>Use:</b> Data augmentation and validation.</p>
+    </article>
+  </div>
+  <div class="notice">We also referenced <code>Indian_Thali_ICVGIP2025-main</code> — an academic implementation from ICVGIP 2025 conference — as a reference for training methodology.</div>
+</section>
+
+<!-- ═══════════════════════ 16 TRAINING ═══════════════════════ -->
+<section id="training">
+  <label>16 • TRAINING</label>
+  <h2>Model Training Process</h2>
+  <div class="mermaid">
+    flowchart TD
+    A["1. Define 50 food classes"] --> B["2. Collect ITD + WED images"]
+    B --> C["3. Annotate segmentation masks"]
+    C --> D["4. Split: Train / Val / Test"]
+    D --> E["5. Fine-tune pretrained YOLOv8-seg"]
+    E --> F["6. Train at 640px resolution"]
+    F --> G["7. Evaluate on test set"]
+    G --> H{"Metrics OK?"}
+    H -->|No| I["8. Analyze errors"]
+    I --> J["9. Add more data / adjust hyperparameters"]
+    J --> E
+    H -->|Yes| K["10. Export best.pt ~54MB"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 17 EVALUATION ═══════════════════════ -->
+<section id="evaluation">
+  <label>17 • EVALUATION</label>
+  <h2>Model Evaluation Metrics</h2>
+  <p>Our trained model's performance metrics (from <code>backend/ai/matrics.jpeg</code>):</p>
+  <div class="metrics">
+    <div><b>91.2%</b><small>Precision</small></div>
+    <div><b>89.5%</b><small>Recall</small></div>
+    <div><b>90.3%</b><small>F1 Score</small></div>
+    <div><b>92.4%</b><small>mAP@50</small></div>
+  </div>
+  <div class="chart-container"><canvas id="metricChart"></canvas></div>
+  <div class="notice warn"><b>Important:</b> Never call mAP50 "accuracy". mAP50 measures detection quality at 50% IoU threshold. Precision = correct detections / all detections. Recall = correct detections / all actual objects.</div>
+</section>
+
+<!-- ═══════════════════════ 18 QUANTITY ═══════════════════════ -->
+<section id="quantity">
+  <label>18 • ESTIMATION</label>
+  <h2>Quantity Estimation — The Area Fraction Math</h2>
+  <p>This is how we convert pixels into grams. Understanding this formula is critical for the team:</p>
+  <div class="mermaid">
+    flowchart TD
+    A["YOLO outputs binary mask for each food"] --> B["pixel_area = mask.sum = count of non-zero pixels"]
+    B --> C["total_pixels = mask_height × mask_width"]
+    C --> D["area_fraction = pixel_area / total_pixels"]
+    D --> E["Look up food category: get_category_for_food"]
+    E --> F["Look up density factor from DENSITY_FACTORS"]
+    F --> G["estimated_weight = area_fraction × 4500.0 × density_factor"]
+    G --> H["Round to 1 decimal place"]
+  </div>
+  <pre>
+# From ai_service.py — The Core Formula
+pixel_area = float(mask.sum())                    # Count non-zero pixels in mask
+total_pixels = float(mask.shape[0] * mask.shape[1])  # Total image pixels (H × W)
+area_fraction = pixel_area / total_pixels         # What fraction of image is this food?
+density = get_density_factor(true_food_name)      # Category-specific multiplier
+estimated_weight_grams = round(area_fraction * MAX_IMAGE_WEIGHT_G * density, 1)
+# MAX_IMAGE_WEIGHT_G = 4500.0</pre>
+  <h3>Density Factor Table</h3>
+  <table>
+    <tr><th>Food Type</th><th>Category</th><th>Density Factor</th><th>Why?</th></tr>
+    <tr><td>Grain</td><td>Rice, Roti</td><td><b>1.2</b></td><td>Dense, heavy per pixel area</td></tr>
+    <tr><td>Protein</td><td>Dal, Sambar, Rajma</td><td><b>1.5</b></td><td>Liquid + solids = heaviest</td></tr>
+    <tr><td>Vegetable</td><td>Curries, Fries</td><td><b>0.8</b></td><td>Lighter, more air gaps</td></tr>
+    <tr><td>Fruit</td><td>Banana, Watermelon</td><td><b>1.0</b></td><td>Standard reference</td></tr>
+    <tr><td>Dairy</td><td>Curd, Raitha</td><td><b>1.1</b></td><td>Semi-liquid, moderate weight</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════ 19 NUTRITION DB ═══════════════════════ -->
+<section id="nutrition">
+  <label>19 • NUTRITION DB</label>
+  <h2>In-Code Nutrition Database</h2>
+  <p>The backend has a built-in <code>NUTRITION_DB</code> dictionary in <code>nutrition_service.py</code> with values per 100g for each generic food category:</p>
+  <table>
+    <tr><th>Generic Category</th><th>Calories (kcal)</th><th>Protein (g)</th><th>Carbs (g)</th><th>Type</th></tr>
+    <tr><td>Rice</td><td>130</td><td>2.7</td><td>28.0</td><td>grain</td></tr>
+    <tr><td>Roti</td><td>297</td><td>9.0</td><td>46.0</td><td>grain</td></tr>
+    <tr><td>Dal</td><td>116</td><td>9.0</td><td>20.0</td><td>protein</td></tr>
+    <tr><td>Vegetable</td><td>65</td><td>2.0</td><td>10.0</td><td>veg</td></tr>
+    <tr><td>Potato</td><td>85</td><td>1.9</td><td>20.0</td><td>veg</td></tr>
+    <tr><td>Salad</td><td>20</td><td>1.0</td><td>4.0</td><td>veg</td></tr>
+    <tr><td>Fruit</td><td>50</td><td>0.5</td><td>14.0</td><td>fruit</td></tr>
+    <tr><td>Curd</td><td>98</td><td>11.0</td><td>3.4</td><td>dairy</td></tr>
+  </table>
+  <div class="mermaid">
+    flowchart LR
+    A["150g Rice detected"] --> B["Lookup: Rice = 130 kcal/100g"]
+    B --> C["Factor = 150/100 = 1.5"]
+    C --> D["Calories = 130 × 1.5 = 195 kcal"]
+    D --> E["Protein = 2.7 × 1.5 = 4.05g"]
+    E --> F["Add to meal total"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 20 NUTRITION JSON ═══════════════════════ -->
+<section id="nutritionjson">
+  <label>20 • IFCT 2017 DATA</label>
+  <h2>Detailed Nutrition JSON (data/nutrition.json)</h2>
+  <p>We also have a more detailed nutrition database file sourced from <b>Indian Food Composition Tables (IFCT 2017)</b> with 12 foods and 9 micronutrients each:</p>
+  <table>
+    <tr><th>Food</th><th>kcal</th><th>Protein</th><th>Carbs</th><th>Fat</th><th>Iron</th><th>Calcium</th><th>Vit C</th></tr>
+    <tr><td>Rice (Cooked)</td><td>130</td><td>2.7g</td><td>28.2g</td><td>0.3g</td><td>0.2mg</td><td>10mg</td><td>0mg</td></tr>
+    <tr><td>Dal (Toor)</td><td>120</td><td>7.0g</td><td>15.0g</td><td>2.5g</td><td>1.5mg</td><td>30mg</td><td>1mg</td></tr>
+    <tr><td>Roti</td><td>240</td><td>8.0g</td><td>44.0g</td><td>3.5g</td><td>2.0mg</td><td>25mg</td><td>0mg</td></tr>
+    <tr><td>Vegetable</td><td>65</td><td>1.8g</td><td>7.0g</td><td>3.2g</td><td>0.8mg</td><td>35mg</td><td>12mg</td></tr>
+    <tr><td>Egg</td><td>155</td><td>12.6g</td><td>1.1g</td><td>10.6g</td><td>1.8mg</td><td>56mg</td><td>0mg</td></tr>
+    <tr><td>Banana</td><td>89</td><td>1.1g</td><td>22.8g</td><td>0.3g</td><td>0.3mg</td><td>5mg</td><td>9mg</td></tr>
+    <tr><td>Milk</td><td>61</td><td>3.2g</td><td>4.8g</td><td>3.3g</td><td>0.1mg</td><td>120mg</td><td>1mg</td></tr>
+    <tr><td>Curd</td><td>60</td><td>3.5g</td><td>4.7g</td><td>3.1g</td><td>0.1mg</td><td>130mg</td><td>1mg</td></tr>
+    <tr><td>Spinach</td><td>23</td><td>2.9g</td><td>3.6g</td><td>0.4g</td><td>2.7mg</td><td>99mg</td><td>28mg</td></tr>
+    <tr><td>Chicken</td><td>165</td><td>18.0g</td><td>3.0g</td><td>9.0g</td><td>1.2mg</td><td>15mg</td><td>2mg</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════ 21 AGE GROUPS ═══════════════════════ -->
+<section id="age">
+  <label>21 • AGE BENCHMARKS</label>
+  <h2>Age-Aware Nutritional Targets</h2>
+  <p>We have <b>two sets</b> of age-group data. The in-code version (simple) and the JSON file version (detailed, ICMR-NIN based):</p>
+  <h3>In-Code (nutrition_service.py) — Used for Scoring</h3>
+  <pre>AGE_GROUPS = {
+  "5-7":   {"calories": 400, "protein": 12.0, "carbs": 60.0},
+  "8-10":  {"calories": 500, "protein": 15.0, "carbs": 75.0},
+  "11-14": {"calories": 650, "protein": 20.0, "carbs": 90.0},
+  "15-18": {"calories": 800, "protein": 25.0, "carbs": 110.0},
+}</pre>
+  <h3>Detailed JSON (data/age_requirements.json) — ICMR-NIN 2020</h3>
+  <table>
+    <tr><th>Age Group</th><th>Daily kcal</th><th>Per-Meal kcal (35%)</th><th>Daily Protein</th><th>Per-Meal Protein</th><th>Iron (daily)</th><th>Calcium (daily)</th></tr>
+    <tr><td>6-8 years</td><td>1,350</td><td>473</td><td>22.2g</td><td>7.8g</td><td>16mg</td><td>550mg</td></tr>
+    <tr><td>9-10 years</td><td>1,700</td><td>595</td><td>29.5g</td><td>10.3g</td><td>21mg</td><td>700mg</td></tr>
+    <tr><td>11-14 years</td><td>2,200</td><td>770</td><td>40.0g</td><td>14.0g</td><td>28mg</td><td>800mg</td></tr>
+    <tr><td>15-17 years</td><td>2,750</td><td>963</td><td>52.0g</td><td>18.2g</td><td>32mg</td><td>850mg</td></tr>
+  </table>
+  <div class="notice"><b>Key Insight:</b> A meal that scores "PASS" for a 7-year-old might score "FAIL" for an 18-year-old because the older student needs 2× the calories and protein.</div>
+</section>
+
+<!-- ═══════════════════════ 22 MEAL RULES ═══════════════════════ -->
+<section id="mealrules">
+  <label>22 • MEAL RULES</label>
+  <h2>Meal Composition Rules (data/meal_rules.json)</h2>
+  <p>We define meal-specific rules including required categories, portion ranges, and an alternate scoring scheme:</p>
+  <div class="grid3">
+    <article><h3>🍛 Lunch</h3><p><b>Required:</b> Cereal + Pulse<br><b>Recommended:</b> Vegetable<br><b>Optional:</b> Fruit, Dairy, Protein<br><b>Min Components:</b> 3</p></article>
+    <article><h3>🥣 Breakfast</h3><p><b>Required:</b> Cereal<br><b>Recommended:</b> Dairy<br><b>Optional:</b> Fruit, Protein, Veg<br><b>Min Components:</b> 2</p></article>
+    <article><h3>🍎 Snack</h3><p><b>Required:</b> None<br><b>Recommended:</b> Fruit, Dairy<br><b>Optional:</b> Cereal, Protein<br><b>Min Components:</b> 1</p></article>
+  </div>
+  <h3>Ideal Portion Ranges (Lunch)</h3>
+  <table>
+    <tr><th>Category</th><th>Min (g)</th><th>Ideal (g)</th><th>Max (g)</th></tr>
+    <tr><td>Cereal (Rice/Roti)</td><td>80</td><td>150</td><td>250</td></tr>
+    <tr><td>Pulse (Dal/Rajma)</td><td>50</td><td>100</td><td>180</td></tr>
+    <tr><td>Vegetable</td><td>40</td><td>75</td><td>150</td></tr>
+    <tr><td>Fruit</td><td>30</td><td>80</td><td>150</td></tr>
+    <tr><td>Dairy (Curd/Milk)</td><td>50</td><td>100</td><td>200</td></tr>
+    <tr><td>Protein (Egg/Chicken)</td><td>30</td><td>60</td><td>120</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════ 23 SCORING ═══════════════════════ -->
+<section id="score">
+  <label>23 • SCORING</label>
+  <h2>Meal Scoring Formula (Exactly How It Works)</h2>
+  <div class="mermaid">
+    flowchart TD
+    A["Total Nutrition from All Foods"] --> B["Protein Score = min 100, Actual/Target × 100"]
+    A --> C["Energy Score = min 100, Actual/Target × 100"]
+    A --> D["Variety Check"]
+    D --> E{"Has Vegetable?"}
+    E -->|Yes| F["+25 to variety"]
+    E -->|No| G["+0"]
+    D --> H{"Has Fruit?"}
+    H -->|Yes| I["+25 to variety"]
+    H -->|No| J["+0"]
+    K["Variety Base = 50"] --> L["Variety Score = 50 + veg_bonus + fruit_bonus"]
+    B --> M["Final = Protein×0.40 + Energy×0.40 + Variety×0.20"]
+    C --> M
+    L --> M
+    M --> N{"Score ≥ 80?"}
+    N -->|Yes| O["🟢 PASS"]
+    N -->|No| P{"Score ≥ 60?"}
+    P -->|Yes| Q["🟡 REVIEW"]
+    P -->|No| R["🔴 FAIL"]
+  </div>
+  <pre>
+# scoring_service.py — The Exact Formula
+
+protein_score = min(100, (total_protein / target_protein) * 100)
+energy_score  = min(100, (total_calories / target_calories) * 100)
+
+variety_score = 50                          # Base score
+if has_vegetable: variety_score += 25       # Bonus for vegetables
+if has_fruit:     variety_score += 25       # Bonus for fruit
+
+final_score = (protein_score * 0.40)        # 40% weight
+            + (energy_score  * 0.40)        # 40% weight
+            + (variety_score * 0.20)        # 20% weight
+
+# Status Thresholds
+if final_score >= 80: status = "PASS"
+elif final_score >= 60: status = "REVIEW"
+else: status = "FAIL"</pre>
+  <div class="notice pass"><b>Example:</b> A meal with 15g protein (target 20g), 500 kcal (target 650 kcal), vegetables present, no fruit → Protein: 75, Energy: 76.9, Variety: 75 → Final: 75×0.4 + 76.9×0.4 + 75×0.2 = <b>75.8 → REVIEW</b></div>
+</section>
+
+<!-- ═══════════════════════ 24 WHY ═══════════════════════ -->
+<section id="why">
+  <label>24 • EXPLAINABILITY</label>
+  <h2>Why This Score? (Explainable AI)</h2>
+  <p>Every score comes with a detailed explanation of <b>exactly what went wrong</b> and <b>exactly what to do about it</b>:</p>
+  <div class="mermaid">
+    flowchart TD
+    A["Score = 68 REVIEW"] --> B["Check Protein"]
+    B --> C{"Protein Score < 80?"}
+    C -->|Yes| D["Issue: Protein is below benchmark 12.4g vs 20g"]
+    C -->|No| E["✅ Protein OK"]
+    A --> F["Check Energy"]
+    F --> G{"Energy Score < 80?"}
+    G -->|Yes| H["Issue: Energy is below benchmark 450kcal vs 650kcal"]
+    G -->|No| I["✅ Energy OK"]
+    A --> J["Check Variety"]
+    J --> K{"Vegetable present?"}
+    K -->|No| L["Issue: Missing vegetable component"]
+    J --> M{"Fruit present?"}
+    M -->|No| N["Issue: Missing fruit component"]
+    D --> O["Recommendation: Add ~30g dal"]
+    H --> P["Recommendation: Increase rice or roti"]
+    L --> Q["Recommendation: Add 1 serving of vegetables"]
+    N --> R["Recommendation: Add 1 serving of seasonal fruit"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 25 RECOMMENDATIONS ═══════════════════════ -->
+<section id="recommend">
+  <label>25 • RECOMMENDATIONS</label>
+  <h2>Automated Recommendations</h2>
+  <div class="cards">
+    <article><h3>🥗 Protein Deficit</h3><p>If Protein Score &lt; 80%: <i>"Increase pulse/protein component (e.g. add ~30g dal)."</i></p></article>
+    <article><h3>⚡ Energy Deficit</h3><p>If Energy Score &lt; 80%: <i>"Increase main carbohydrate portion (e.g. rice or roti)."</i></p></article>
+    <article><h3>🥬 No Vegetables</h3><p>If no vegetable detected: <i>"Add 1 serving of vegetables."</i></p></article>
+    <article><h3>🍌 No Fruit</h3><p>If no fruit detected: <i>"Add 1 serving of seasonal fruit."</i></p></article>
+    <article><h3>✅ Perfect Meal</h3><p>If score ≥ 80 and no issues: <i>"No changes needed. Excellent meal!"</i></p></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 26 WHAT-IF ═══════════════════════ -->
+<section id="whatif">
+  <label>26 • SIMULATION</label>
+  <h2>What-If Simulator</h2>
+  <p>Adjust the sliders below to see how adding more dal or vegetables changes the score. This uses the <b>real backend formula</b>:</p>
+  <div class="sim">
+    <label>Dal (grams) <input id="dal" type="range" min="10" max="200" value="60"><output id="dout">60g</output></label>
+    <label>Vegetables (grams) <input id="veg" type="range" min="10" max="150" value="45"><output id="vout">45g</output></label>
+    <h3 id="simscore">55 → <span class="highlight">68</span></h3>
+  </div>
+  <div class="notice">This simulator assumes 150g rice is already on the plate, and uses Age 11-14 targets (650 kcal, 20g protein). It calculates the real Protein, Energy, and Variety scores.</div>
+</section>
+
+<!-- ═══════════════════════ 27 HISTORY ═══════════════════════ -->
+<section id="history">
+  <label>27 • RECORDS</label>
+  <h2>Meal History System</h2>
+  <p>Every analyzed meal is saved to <code>data/meal_history.csv</code> with all details. The frontend fetches the last 50 records via <code>GET /api/meals/history</code>.</p>
+  <div class="mermaid">
+    flowchart LR
+    A["Analysis Complete"] --> B["save_meal_analysis"]
+    B --> C["Generate auto-increment ID"]
+    C --> D["Serialize: detections, quantities, nutrition, scores as JSON strings"]
+    D --> E["Append row to meal_history.csv"]
+    E --> F["Frontend fetches GET /api/meals/history"]
+    F --> G["Returns last 50 meals, newest first"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 28 CSV DATABASE ═══════════════════════ -->
+<section id="csvdb">
+  <label>28 • DATABASE</label>
+  <h2>CSV Database Layer (csv_db.py)</h2>
+  <p>Instead of SQLite or PostgreSQL, we use simple CSV files for data persistence. This makes the project easy to inspect and debug:</p>
+  <div class="grid2">
+    <article>
+      <h3>📄 students.csv</h3>
+      <pre>Columns:
+id, name, age, age_group,
+class_number, face_encoding,
+created_at</pre>
+      <p>Face encodings are stored as JSON-serialized 128-element arrays.</p>
+    </article>
+    <article>
+      <h3>📄 meal_history.csv</h3>
+      <pre>Columns:
+id, student_id, student_name,
+student_age, age_group, meal_type,
+analysis_date, detected_foods,
+estimated_quantities, nutrition_values,
+score, status, component_scores,
+explanation, recommendations</pre>
+    </article>
+  </div>
+  <div class="notice">CSV files are auto-created on first run via <code>_init_csv()</code> which writes headers if the file doesn't exist.</div>
+</section>
+
+<!-- ═══════════════════════ 29 ANALYTICS ═══════════════════════ -->
+<section id="analytics">
+  <label>29 • ANALYTICS</label>
+  <h2>Analytics Engine</h2>
+  <p>The <code>/api/dashboard/stats</code> endpoint aggregates all meal history data to provide school-level insights:</p>
+  <div class="mermaid">
+    flowchart TD
+    A["Load all meals from CSV"] --> B["Count total meals"]
+    A --> C["Calculate average score"]
+    A --> D["Count PASS meals → pass rate"]
+    A --> E["For each meal: count food occurrences"]
+    E --> F["Sort by frequency → top 5 foods"]
+    A --> G["Check each meal for protein/dairy"]
+    A --> H["Check each meal for fruit"]
+    G --> I["protein_days count"]
+    H --> J["fruit_days count"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 30 DASHBOARD ═══════════════════════ -->
+<section id="dashboard">
+  <label>30 • DASHBOARD</label>
+  <h2>School Dashboard</h2>
+  <div class="metrics">
+    <div><b>Total Meals</b><small>Analyzed to date</small></div>
+    <div><b>Avg Score</b><small>Across all meals</small></div>
+    <div><b>Pass Rate</b><small>% scoring ≥ 80</small></div>
+    <div><b>Top Foods</b><small>Most frequently detected</small></div>
+  </div>
+  <p>The dashboard also tracks "Common Issues" — showing what percentage of meals were missing protein sources or fruit components, with visual progress bars.</p>
+</section>
+
+<!-- ═══════════════════════ 31 FRONTEND ═══════════════════════ -->
+<section id="frontend">
+  <label>31 • FRONTEND</label>
+  <h2>Frontend Architecture</h2>
+  <p>The frontend is a <b>single HTML file</b> (<code>frontend/index.html</code>, ~55KB) with everything embedded — no build step needed:</p>
+  <div class="tags">
+    <span>Tailwind CSS</span><span>GSAP Animations</span><span>Lucide Icons</span><span>SweetAlert2</span><span>MediaDevices API</span><span>Canvas API</span><span>SVG Score Ring</span><span>Fetch API</span>
+  </div>
+  <div class="mermaid">
+    flowchart TD
+    A["5 Screens"] --> B["🏠 Home - Student ID / Register"]
+    A --> C["📸 Scan - Upload / Webcam"]
+    A --> D["🤖 Analysis - Live AI Steps"]
+    A --> E["📊 Result - Score + Detections"]
+    A --> F["📋 History + Dashboard"]
+    B --> G["Tab switching: Scan vs Register"]
+    C --> H["File input OR Webcam capture"]
+    D --> I["Scanner line animation + Step indicators"]
+    E --> J["SVG score ring + Canvas mask overlay"]
+  </div>
+  <div class="grid2">
+    <article><h3>🎨 Visual Features</h3><ul>
+      <li>Dark theme with custom color palette</li>
+      <li>GSAP fade-in transitions between screens</li>
+      <li>Scanner line animation during analysis</li>
+      <li>SVG circular score ring with animated stroke</li>
+      <li>Canvas overlay for detection bounding boxes</li>
+      <li>Count-up number animations</li>
+    </ul></article>
+    <article><h3>📷 Camera Features</h3><ul>
+      <li>Webcam access via <code>navigator.mediaDevices.getUserMedia</code></li>
+      <li>Front camera for face (facingMode: 'user')</li>
+      <li>Back camera for meal (facingMode: 'environment')</li>
+      <li>Auto-capture polling (1 frame/second for face detection)</li>
+      <li>SweetAlert2 modal with live video feed</li>
+      <li>Canvas-based frame capture to Base64 JPEG</li>
+    </ul></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 32 BACKEND ═══════════════════════ -->
+<section id="backend">
+  <label>32 • BACKEND</label>
+  <h2>Backend Architecture</h2>
+  <div class="mermaid">
+    flowchart TD
+    A["Frontend fetch"] --> B["FastAPI main.py"]
+    B --> C["ai_service.py: YOLO Inference"]
+    B --> D["nutrition_service.py: Nutrition + Scoring"]
+    B --> E["scoring_service.py: Alternate Scorer"]
+    B --> F["face_utils.py: Face Recognition"]
+    B --> G["csv_db.py: CSV Database"]
+    C --> H["best.pt YOLOv8-seg model"]
+    D --> I["NUTRITION_DB + AGE_GROUPS"]
+    G --> J["students.csv + meal_history.csv"]
+  </div>
+  <div class="notice"><b>Server:</b> <code>uvicorn backend.main:app --host 0.0.0.0 --port 8080 --reload</code></div>
+</section>
+
+<!-- ═══════════════════════ 33 API ENDPOINTS ═══════════════════════ -->
+<section id="endpoints">
+  <label>33 • API ENDPOINTS</label>
+  <h2>All 9 FastAPI Endpoints</h2>
+
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/analyze</span><p>Main endpoint. Accepts <code>student_id</code> or <code>age</code>, plus <code>image_data</code> (Base64). Returns detections, quantities, nutrition, score, status, recommendations.</p></div>
+
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/students</span><p>Returns all registered students from <code>students.csv</code>.</p></div>
+
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/students/register</span><p>Register a new student. Accepts <code>id, name, age, class_number, face_image</code> (optional Base64). Auto-generates face encoding if face provided.</p></div>
+
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/students/check_face</span><p>Checks if a face is clearly visible in the provided Base64 image. Used during registration auto-capture polling.</p></div>
+
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/students/recognize</span><p>Face login. Compares webcam face against all stored encodings. Returns matched student if distance ≤ 0.6.</p></div>
+
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/meals/history</span><p>Returns last 50 meal analyses, sorted newest first.</p></div>
+
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/dashboard/stats</span><p>Aggregated dashboard statistics: total meals, average score, pass rate, top 5 foods, protein/fruit day counts.</p></div>
+
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/nutrition/foods</span><p>Returns the NUTRITION_DB dictionary (8 food categories).</p></div>
+
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/nutrition/age-groups</span><p>Returns all AGE_GROUPS with calorie/protein/carb targets.</p></div>
+</section>
+
+<!-- ═══════════════════════ 34 CODE STRUCTURE ═══════════════════════ -->
+<section id="code">
+  <label>34 • CODE</label>
+  <h2>Complete File Structure</h2>
+  <pre>AI-MealGuard/
+├── frontend/
+│   └── index.html              ← Single-page app (55KB)
+├── backend/
+│   ├── main.py                 ← FastAPI app + 9 endpoints
+│   ├── ai_service.py           ← YOLO inference + UNSCRAMBLE + weight estimation
+│   ├── nutrition_service.py    ← NUTRITION_DB + AGE_GROUPS + score_meal()
+│   ├── scoring_service.py      ← Alternate scorer with weighted formula
+│   ├── face_utils.py           ← Face encoding + matching (tolerance 0.6)
+│   ├── csv_db.py               ← CSV read/write for students + meals
+│   ├── best.pt                 ← YOLOv8-seg model (~54MB)
+│   ├── data/
+│   │   └── age_requirements.json ← ICMR-NIN targets (4 age bands)
+│   └── ai/
+│       ├── ITD/                ← Indian Thali Dataset (training data)
+│       ├── ITD.tar.gz          ← 861MB compressed
+│       ├── WED/                ← Web-scraped Extended Dataset
+│       ├── WED.tar.gz          ← 159MB compressed
+│       └── matrics.jpeg        ← Model evaluation metrics
+├── data/
+│   ├── students.csv            ← Student database
+│   ├── meal_history.csv        ← All analyzed meals
+│   ├── nutrition.json          ← IFCT 2017 (12 foods, 9 nutrients)
+│   ├── age_requirements.json   ← Detailed ICMR-NIN data
+│   └── meal_rules.json         ← Meal composition rules
+├── documentation.html          ← This file (team handover)
+├── Dockerfile                  ← Docker deployment
+├── requirements.txt            ← Python dependencies
+├── start.bat                   ← Windows one-click launcher
+├── .env / .env.example         ← Environment variables
+└── README.md                   ← Project summary</pre>
+</section>
+
+<!-- ═══════════════════════ 35 DEPLOYMENT ═══════════════════════ -->
+<section id="deploy">
+  <label>35 • DEPLOYMENT</label>
+  <h2>Deployment & Running</h2>
+  <div class="grid2">
+    <article>
+      <h3>🖥️ Local (Windows)</h3>
+      <p>Double-click <code>start.bat</code>. It runs:</p>
+      <pre>pip install -r requirements.txt
+uvicorn backend.main:app --host 127.0.0.1 --port 8080 --reload</pre>
+      <p>Then open <code>http://localhost:8080</code> in browser.</p>
+    </article>
+    <article>
+      <h3>🐳 Docker / Hugging Face</h3>
+      <pre>FROM python:3.11-slim
+# Install dlib + OpenCV deps
+RUN apt-get install build-essential cmake libgl1-mesa-glx
+# Install CPU PyTorch (saves RAM)
+RUN pip install torch torchvision --index-url .../cpu
+RUN pip install -r requirements.txt
+EXPOSE 7860
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]</pre>
+    </article>
+  </div>
+  <h3>Python Dependencies (requirements.txt)</h3>
+  <div class="tags">
+    <span>fastapi 0.115.6</span><span>uvicorn 0.34.0</span><span>ultralytics ≥8.3.0</span><span>torch ≥2.1.0</span><span>face_recognition ≥1.3.0</span><span>opencv-python-headless</span><span>Pillow ≥10.2.0</span><span>numpy &lt;2.0</span><span>pydantic ≥2.10.0</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 36 TESTING ═══════════════════════ -->
+<section id="testing">
+  <label>36 • TESTING</label>
+  <h2>Functional Test Cases</h2>
+  <table>
+    <tr><th>Test Case</th><th>Input</th><th>Expected Result</th><th>Evidence</th></tr>
+    <tr><td>Valid Student ID</td><td>S482</td><td>Profile loaded, name + age displayed</td><td>Screenshot</td></tr>
+    <tr><td>Invalid Student ID</td><td>XXXX</td><td>404 error "Student not found"</td><td>Screenshot</td></tr>
+    <tr><td>Age-Only Mode</td><td>Age: 12</td><td>Uses age group "11-14" directly</td><td>Screenshot</td></tr>
+    <tr><td>Face Registration</td><td>Webcam frame</td><td>128D encoding saved to CSV</td><td>CSV row</td></tr>
+    <tr><td>Face Login Match</td><td>Known face</td><td>Auto-fills student ID</td><td>Screenshot</td></tr>
+    <tr><td>Face Login No Match</td><td>Unknown face</td><td>"Face not recognized" error</td><td>Screenshot</td></tr>
+    <tr><td>Clear Plate Photo</td><td>Good quality image</td><td>Foods detected with >70% confidence</td><td>Prediction</td></tr>
+    <tr><td>Low Light Image</td><td>Dark/blurry image</td><td>Lower confidence, fewer detections</td><td>Prediction</td></tr>
+    <tr><td>Unknown Food</td><td>Non-Indian food</td><td>Low confidence / misclassification</td><td>Prediction</td></tr>
+    <tr><td>Scoring: Good Meal</td><td>Rice+Dal+Veg+Fruit</td><td>Score ≥ 80, status PASS</td><td>API response</td></tr>
+    <tr><td>Scoring: Poor Meal</td><td>Rice only</td><td>Score < 60, status FAIL</td><td>API response</td></tr>
+    <tr><td>Save Meal</td><td>After analysis</td><td>New row in meal_history.csv</td><td>CSV file</td></tr>
+    <tr><td>History Fetch</td><td>GET /api/meals/history</td><td>Last 50 meals returned</td><td>API response</td></tr>
+    <tr><td>What-If Simulator</td><td>Adjust dal slider</td><td>Score recalculates in real-time</td><td>Before/After</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════ 37 EDGE CASES ═══════════════════════ -->
+<section id="edge">
+  <label>37 • ROBUSTNESS</label>
+  <h2>Edge Cases & How We Handle Them</h2>
+  <div class="cards">
+    <article><h3>🔴 No Image Provided</h3><p>Backend returns a dummy detection (250g rice) as fallback for demo mode.</p></article>
+    <article><h3>🔴 No Face Detected</h3><p>Returns <code>face_detected: false</code> and shows "No face detected" error.</p></article>
+    <article><h3>🔴 Unknown Age Group</h3><p>Falls back to "11-14" age group as default.</p></article>
+    <article><h3>🔴 Low Confidence Detection</h3><p>Still included in results — frontend can filter/warn.</p></article>
+    <article><h3>🔴 Overlapping Foods</h3><p>YOLO handles via NMS (Non-Maximum Suppression).</p></article>
+    <article><h3>🔴 Empty Plate</h3><p>No detections → empty quantities → score = 10 (base variety only).</p></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 38 RESULTS ═══════════════════════ -->
+<section id="results">
+  <label>38 • RESULTS</label>
+  <h2>Final Prototype Results</h2>
+  <div class="result">
+    <b>82 / 100</b>
+    <span>PASS<br>Energy ✓ · Protein ✓ · Vegetables ✓ · Fruit ⚠</span>
+  </div>
+  <div class="notice warn">Replace example values above with actual final prototype measurements before the competition.</div>
+</section>
+
+<!-- ═══════════════════════ 39 LIMITATIONS ═══════════════════════ -->
+<section id="limits">
+  <label>39 • HONESTY</label>
+  <h2>Known Limitations</h2>
+  <ul>
+    <li>Quantity is <b>estimated from 2D pixel area</b>, not physically weighed — accuracy depends on camera angle and distance.</li>
+    <li>Similar-looking foods (e.g. sambar vs rasam) can be confused by the model.</li>
+    <li>Poor lighting significantly reduces detection quality and confidence.</li>
+    <li>Overlapping or occluded food items may be partially detected.</li>
+    <li>Nutrition values are based on generic category averages, not exact recipe analysis.</li>
+    <li>Face recognition requires good lighting and front-facing position.</li>
+    <li>CSV storage is not suitable for production scale (thousands of concurrent users).</li>
+    <li>The density factor approach is a rough approximation — a depth camera would improve accuracy.</li>
+    <li>This is a <b>monitoring/screening prototype</b>, not a laboratory food-safety test.</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════ 40 FUTURE ═══════════════════════ -->
+<section id="future">
+  <label>40 • FUTURE</label>
+  <h2>Future Scope</h2>
+  <div class="mermaid">
+    flowchart LR
+    A["Current Prototype"] --> B["Depth Camera for 3D Weight"]
+    B --> C["100+ Food Classes"]
+    C --> D["Mobile App"]
+    D --> E["Real-time Alerts"]
+    E --> F["Multi-school Dashboard"]
+    F --> G["Government API Integration"]
+    G --> H["Production Database PostgreSQL"]
+  </div>
+</section>
+
+<!-- ═══════════════════════ 41 SOURCES ═══════════════════════ -->
+<section id="sources">
+  <label>41 • SOURCES</label>
+  <h2>Sources & References</h2>
+  <div class="grid2">
+    <article><h3>📊 Nutrition Data</h3><ul>
+      <li>Indian Food Composition Tables (IFCT 2017)</li>
+      <li>ICMR-NIN Recommended Dietary Allowances (RDA) 2020</li>
+      <li>PM POSHAN Mid-Day Meal Scheme guidelines</li>
+    </ul></article>
+    <article><h3>🤖 AI & Technology</h3><ul>
+      <li>Ultralytics YOLOv8 Documentation</li>
+      <li>Indian Thali Dataset (ITD) — ICVGIP 2025</li>
+      <li>face_recognition library (dlib-based)</li>
+      <li>FastAPI framework documentation</li>
+    </ul></article>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 42 HANDOVER ═══════════════════════ -->
+<section id="handover">
+  <label>42 • HANDOVER</label>
+  <h2>Team Handover Checklist</h2>
+  <div class="checks">
+    <label><input type="checkbox"> Problem statement finalized</label>
+    <label><input type="checkbox"> SDG 2 explanation clear</label>
+    <label><input type="checkbox"> All 50 food classes documented</label>
+    <label><input type="checkbox"> UNSCRAMBLE dictionary explained</label>
+    <label><input type="checkbox"> Quantity formula documented</label>
+    <label><input type="checkbox"> Density factors listed</label>
+    <label><input type="checkbox"> NUTRITION_DB values verified</label>
+    <label><input type="checkbox"> Age group benchmarks verified</label>
+    <label><input type="checkbox"> Scoring formula documented</label>
+    <label><input type="checkbox"> Facial recognition explained</label>
+    <label><input type="checkbox"> All 9 API endpoints listed</label>
+    <label><input type="checkbox"> CSV database schema documented</label>
+    <label><input type="checkbox"> Deployment instructions included</label>
+    <label><input type="checkbox"> Testing evidence collected</label>
+    <label><input type="checkbox"> Limitations honestly stated</label>
+    <label><input type="checkbox"> Future scope labelled</label>
+    <label><input type="checkbox"> Screenshots collected</label>
+    <label><input type="checkbox"> Demo student data anonymized</label>
+  </div>
+  <div class="final">
+    <b>One-minute elevator pitch:</b><br>
+    AI MealGuard is an AI-powered school meal monitoring system designed around SDG 2 — Zero Hunger. A student is identified by ID or facial recognition. Their meal plate is photographed and analyzed by a YOLOv8 instance segmentation model trained on 50 Indian food classes. The system extracts pixel-level masks, estimates approximate weights using area-fraction math and density factors, calculates total nutrition from a verified database, compares it against ICMR-NIN age-group benchmarks, generates a weighted score (Protein 40% + Energy 40% + Variety 20%), explains exactly what's missing, recommends specific improvements, and stores everything in a historical database for analytics. The full stack includes a Tailwind CSS frontend with facial recognition, a FastAPI backend with 9 endpoints, CSV-based persistence, and Docker deployment.
+  </div>
+</section>
+
+<footer>AI MealGuard · Complete Team Documentation (42 Sections) · Video storyboard and judge Q&A intentionally excluded.</footer>
+</main>
+
+<!-- SEARCH MODAL -->
+<div id="modal" class="modal">
+  <div class="modalbox">
+    <input id="q" placeholder="Search documentation…">
+    <button onclick="document.getElementById('modal').classList.remove('show')">×</button>
+    <div id="sr"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ── Navigation ──
+  const sections = document.querySelectorAll('main > section');
+  const navLinks = document.querySelectorAll('aside nav a');
+
+  function navigateTo(hash) {
+    if (!hash) hash = '#overview';
+    sections.forEach(sec => sec.classList.remove('active'));
+    navLinks.forEach(link => link.classList.remove('active'));
+    const activeSection = document.querySelector(hash);
+    if (activeSection) {
+      activeSection.classList.add('active');
+      const activeLink = document.querySelector(`aside nav a[href="${hash}"]`);
+      if (activeLink) activeLink.classList.add('active');
+      document.querySelector('aside').classList.remove('open');
+      window.scrollTo(0, 0);
+      gsap.fromTo(activeSection.children,
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" }
+      );
+      // Re-render mermaid charts in the active section
+      try { mermaid.run({ nodes: activeSection.querySelectorAll('.mermaid') }); } catch(e) {}
+    }
+  }
+
+  window.addEventListener('hashchange', () => navigateTo(window.location.hash));
+  navigateTo(window.location.hash);
+
+  // ── Mobile menu ──
+  document.getElementById('menu').addEventListener('click', () => {
+    document.querySelector('aside').classList.toggle('open');
+  });
+
+  // ── Theme Toggle ──
+  const themeBtn = document.getElementById('theme');
+  themeBtn.addEventListener('click', () => {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+    themeBtn.textContent = isLight ? '◐' : '◑';
+    initCharts();
+  });
+
+  // ── What-If Simulator ──
+  const dalInput = document.getElementById('dal');
+  const vegInput = document.getElementById('veg');
+  const dout = document.getElementById('dout');
+  const vout = document.getElementById('vout');
+  const simscore = document.getElementById('simscore');
+
+  function updateSimulation() {
+    const dalVal = parseInt(dalInput.value);
+    const vegVal = parseInt(vegInput.value);
+    dout.textContent = dalVal + 'g';
+    vout.textContent = vegVal + 'g';
+    // Real formula (Age 11-14: 650 kcal, 20g protein)
+    let dalProtein = (dalVal / 100) * 9.0;
+    let dalCals = (dalVal / 100) * 116;
+    let vegProtein = (vegVal / 100) * 2.0;
+    let vegCals = (vegVal / 100) * 65;
+    let riceProtein = 4.05; // 150g rice
+    let riceCals = 195;
+    let totalProtein = dalProtein + vegProtein + riceProtein;
+    let totalCals = dalCals + vegCals + riceCals;
+    let proteinScore = Math.min(100, (totalProtein / 20.0) * 100);
+    let energyScore = Math.min(100, (totalCals / 650.0) * 100);
+    let varietyScore = 50 + 25; // base + veg (no fruit assumed)
+    let finalScore = (proteinScore * 0.40) + (energyScore * 0.40) + (varietyScore * 0.20);
+    let total = Math.round(finalScore);
+    let status = total >= 80 ? '🟢 PASS' : total >= 60 ? '🟡 REVIEW' : '🔴 FAIL';
+    simscore.innerHTML = `${status} → <span class="highlight">${total}</span> / 100`;
+  }
+
+  if (dalInput && vegInput) {
+    dalInput.addEventListener('input', updateSimulation);
+    vegInput.addEventListener('input', updateSimulation);
+    updateSimulation();
+  }
+
+  // ── Search ──
+  const searchBtn = document.getElementById('search');
+  const modal = document.getElementById('modal');
+  const searchInput = document.getElementById('q');
+  const searchResults = document.getElementById('sr');
+
+  searchBtn.addEventListener('click', () => {
+    modal.classList.add('show');
+    setTimeout(() => searchInput.focus(), 100);
+  });
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase().trim();
+    searchResults.innerHTML = '';
+    if (!query) return;
+    navLinks.forEach(link => {
+      if (link.textContent.toLowerCase().includes(query)) {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.textContent;
+        a.addEventListener('click', () => modal.classList.remove('show'));
+        searchResults.appendChild(a);
       }
-
-      const text = document.querySelector('.blueprint-container').innerText;
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Try to find an Indian English voice
-      const voices = window.speechSynthesis.getVoices();
-      const indianVoice = voices.find(v => v.lang.includes('en-IN') || v.name.includes('India'));
-      if (indianVoice) {
-        utterance.voice = indianVoice;
-      }
-      
-      utterance.onend = () => {
-        speakBtn.textContent = '🔊';
-        isSpeaking = false;
-      };
-
-      window.speechSynthesis.speak(utterance);
-      speakBtn.textContent = '⏸️';
-      isSpeaking = true;
     });
+    sections.forEach(sec => {
+      if (sec.textContent.toLowerCase().includes(query) && !searchResults.querySelector(`a[href="#${sec.id}"]`)) {
+        const title = sec.querySelector('h2');
+        if (title) {
+          const a = document.createElement('a');
+          a.href = '#' + sec.id;
+          a.textContent = title.textContent;
+          a.addEventListener('click', () => modal.classList.remove('show'));
+          searchResults.appendChild(a);
+        }
+      }
+    });
+  });
 
-    // Load voices properly
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.getVoices();
+  // ── Charts ──
+  let chartInstance = null;
+  function initCharts() {
+    const ctx = document.getElementById('metricChart');
+    if (!ctx) return;
+    if (chartInstance) chartInstance.destroy();
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Precision', 'Recall', 'F1 Score', 'mAP@50'],
+        datasets: [{
+          label: 'Model Metrics (%)',
+          data: [91.2, 89.5, 90.3, 92.4],
+          backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(139, 92, 246, 0.7)'],
+          borderRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, max: 100, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, ticks: { color: isDark ? '#9CA3AF' : '#64748B' } },
+          x: { grid: { display: false }, ticks: { color: isDark ? '#9CA3AF' : '#64748B' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+  initCharts();
+
+  // ── Mermaid ──
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#3B82F6', primaryTextColor: '#fff', lineColor: '#9CA3AF', secondaryColor: '#1E293B' } });
+
+  // ── SPEAK BUTTON (Indian English Voice) ──
+  const speakBtn = document.getElementById('speakBtn');
+  let isSpeaking = false;
+
+  speakBtn.addEventListener('click', () => {
+    if (isSpeaking) {
+      speechSynthesis.cancel();
+      isSpeaking = false;
+      speakBtn.classList.remove('speaking');
+      speakBtn.textContent = '🔊';
+      return;
+    }
+
+    // Get currently active section's text
+    const activeSection = document.querySelector('main > section.active');
+    if (!activeSection) return;
+
+    let text = activeSection.innerText;
+    // Clean up text: remove chart data, excessive whitespace
+    text = text.replace(/\n{3,}/g, '\n\n').trim();
+    // Limit to first 5000 chars to avoid TTS issues
+    if (text.length > 5000) text = text.substring(0, 5000) + '... That is the summary of this section.';
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    // Try to find Indian English voice
+    const voices = speechSynthesis.getVoices();
+    const indianVoice = voices.find(v => v.lang === 'en-IN') ||
+                        voices.find(v => v.lang.startsWith('en-IN')) ||
+                        voices.find(v => v.name.toLowerCase().includes('india')) ||
+                        voices.find(v => v.lang === 'hi-IN') ||
+                        voices.find(v => v.lang.startsWith('en'));
+    if (indianVoice) utterance.voice = indianVoice;
+    utterance.lang = 'en-IN';
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      speakBtn.classList.add('speaking');
+      speakBtn.textContent = '⏹️';
     };
-  </script>
-</body>
+    utterance.onend = () => {
+      isSpeaking = false;
+      speakBtn.classList.remove('speaking');
+      speakBtn.textContent = '🔊';
+    };
+    utterance.onerror = () => {
+      isSpeaking = false;
+      speakBtn.classList.remove('speaking');
+      speakBtn.textContent = '🔊';
+    };
 
+    speechSynthesis.speak(utterance);
+  });
+
+  // Preload voices (some browsers need this)
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = () => {};
+  }
+  speechSynthesis.getVoices();
+});
+</script>
+</body>
 </html>
